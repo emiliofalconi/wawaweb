@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WawaWeb - Plataforma de Gestión de Banco de Leche y Alarma Neonatal (COIL 202715)</title>
+  
+  <!-- Tipografía Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Hoja de Estilos de la Aplicación -->
+  <link rel="stylesheet" href="styles.css">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0D9488">
+</head>
+<body>
+
+  <!-- =========================================================================
+       HEADER GLOBAL Y METADATOS COIL
+       ========================================================================= -->
+  <header class="top-navbar">
+    <div class="brand-group" onclick="UIController.switchScreen('screen-dashboard')">
+      <div class="brand-icon">W</div>
+      <div class="brand-text">
+        <h1>WawaWeb <span class="brand-badge">COIL 202715</span></h1>
+        <p class="brand-subtitle">UCAB (Informática) • PUCE (Enfermería)</p>
+      </div>
+    </div>
+
+    <div class="top-meta">
+      <div class="coil-pill">
+        <span>Paciente: <span class="baby-display-name">Sofía</span> (15 d)</span>
+      </div>
+      <button class="notification-bell-btn" onclick="UIController.switchScreen('screen-inventory')" title="Lotes en Alerta">
+        <svg class="icon-svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+        </svg>
+        <span class="bell-badge">2</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- =========================================================================
+       BARRA DE PANTALLAS (SUB-NAVBAR)
+       ========================================================================= -->
+  <nav class="screens-nav-bar">
+    <button class="nav-tab-btn active" data-screen="screen-dashboard">Dashboard FIFO</button>
+    <button class="nav-tab-btn" data-screen="screen-inventory">Banco de Leche</button>
+    <button class="nav-tab-btn" data-screen="screen-extraction">Nueva Extracción</button>
+    <button class="nav-tab-btn" data-screen="screen-calculator">Calculadora</button>
+    <button class="nav-tab-btn" data-screen="screen-calendar">Calendario Semafórico</button>
+    <button class="nav-tab-btn" data-screen="screen-thawing">Temperado Seguro</button>
+    <button class="nav-tab-btn" data-screen="screen-triage">Alerta Neonatal</button>
+    <button class="nav-tab-btn" data-screen="screen-profile">Perfil y Reportes</button>
+  </nav>
+
+  <!-- =========================================================================
+       CONTENEDOR CENTRAL DE LA APLICACIÓN
+       ========================================================================= -->
+  <main class="main-wrapper">
+    <div class="device-frame">
+
+      <!-- ---------------------------------------------------------------------
+           PANTALLA 1: DASHBOARD ASISTENCIAL (FIFO & STOCK)
+           --------------------------------------------------------------------- -->
+      <section id="screen-dashboard" class="app-screen active-screen">
+        <div class="hero-header">
+          <span class="hero-tag">Seguimiento Clínico y Logístico</span>
+          <h2 class="hero-title">Lactante: <span class="baby-display-name">Sofía</span></h2>
+          <p class="hero-desc">15 días de vida • 3,200 g • Régimen: Lactancia Materna Exclusiva</p>
+        </div>
+
+        <!-- Stock Disponible (ml y oz) -->
+        <div class="stock-grid">
+          <div class="stock-stat-box">
+            <div class="stat-value" id="dash-stock-ml">0 ml</div>
+            <div class="stat-label">Stock Total Disponible</div>
+            <span class="stat-badge badge-refrigerado" id="dash-refri-badge">Refri: 0 ml</span>
+          </div>
+          <div class="stock-stat-box">
+            <div class="stat-value" id="dash-stock-oz">0.0 oz</div>
+            <div class="stat-label">Equivalente en Onzas</div>
+            <span class="stat-badge badge-congelado" id="dash-freezer-badge">Congelador: 0 ml</span>
+          </div>
+        </div>
+
+        <!-- Tarjeta del Frasco Prioritario Hoy (FIFO) -->
+        <div id="dash-fifo-container">
+          <!-- Generado dinámicamente por FIFOEngine -->
+        </div>
+
+        <!-- Grilla de Accesos Rápidos -->
+        <div class="quick-tiles-grid">
+          <div class="action-tile-btn" onclick="UIController.switchScreen('screen-extraction')">
+            <span class="tile-title">Nueva Extracción</span>
+            <span class="tile-desc">Registrar volumen (ml/oz) y fecha</span>
+          </div>
+          <div class="action-tile-btn" onclick="UIController.switchScreen('screen-inventory')">
+            <span class="tile-title">Ver Inventario FIFO</span>
+            <span class="tile-desc">Control de rotación y lotes</span>
+          </div>
+          <div class="action-tile-btn" onclick="UIController.switchScreen('screen-calculator')">
+            <span class="tile-title">Calculadora Pediátrica</span>
+            <span class="tile-desc">Dosis según peso y tomas</span>
+          </div>
+          <div class="action-tile-btn" onclick="UIController.switchScreen('screen-calendar')">
+            <span class="tile-title">Semáforo de Frescura</span>
+            <span class="tile-desc">Vigilancia de estabilidad térmica</span>
+          </div>
+          <div class="action-tile-btn" onclick="UIController.switchScreen('screen-thawing')">
+            <span class="tile-title">Baño María Seguro</span>
+            <span class="tile-desc">Temporizador clínico de 10 min</span>
+          </div>
+          <div class="action-tile-btn" onclick="UIController.switchScreen('screen-triage')" style="border-color: #FECDD3; background: #FFF5F6;">
+            <span class="tile-title" style="color: #BE123C;">Alerta Neonatal</span>
+            <span class="tile-desc">Tamizaje de signos de deshidratación</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------------------------------------------------------------------
+           PANTALLA 2: GESTIÓN DE BANCO DE LECHE (INVENTARIO FIFO COMPLETO)
+           --------------------------------------------------------------------- -->
+      <section id="screen-inventory" class="app-screen">
+        <div class="hero-header" style="background: linear-gradient(135deg, #1E3A8A 0%, #0D9488 100%);">
+          <span class="hero-tag">Trazabilidad de Cadena de Frío</span>
+          <h2 class="hero-title">Inventario FIFO de Extracciones</h2>
+          <p class="hero-desc">Lotes ordenados por antigüedad biológica (Primero en Entrar, Primero en Salir).</p>
+        </div>
+
+        <!-- Chips de Filtro -->
+        <div class="inventory-filters-row">
+          <button class="filter-chip-btn active" data-filter="all">Todos los Activos</button>
+          <button class="filter-chip-btn" data-filter="refri">Refrigerador (4 °C)</button>
+          <button class="filter-chip-btn" data-filter="freezer">Congelador (-18 °C)</button>
+          <button class="filter-chip-btn" data-filter="consumed">Historial Consumidos</button>
+        </div>
+
+        <!-- Contenedor dinámico de Lotes -->
+        <div id="inventory-list-container" class="batch-list-container">
+          <!-- Inyectado por UIController -->
+        </div>
+
+        <div style="margin-top: 20px;">
+          <button class="btn-primary" onclick="UIController.switchScreen('screen-extraction')">
+            Registrar Nueva Extracción de Leche
+          </button>
+        </div>
+      </section>
+
+      <!-- ---------------------------------------------------------------------
+           PANTALLA 3: CAPTURA DE NUEVA EXTRACCIÓN (FORMULARIO FIFO)
+           --------------------------------------------------------------------- -->
+      <section id="screen-extraction" class="app-screen">
+        <div class="hero-header" style="background: linear-gradient(135deg, #0D9488 0%, #047857 100%);">
+          <span class="hero-tag">Registro de Extracción Biosegura</span>
+          <h2 class="hero-title">Ingreso de Nuevo Lote</h2>
+          <p class="hero-desc">El lote ingresará automáticamente al final de la cola FIFO para control de caducidad.</p>
+        </div>
+
+        <form id="form-new-extraction" onsubmit="UIController.handleSaveExtraction(event)">
+          <div class="form-group">
+            <label class="form-label">
+              <span>Volumen Extraído</span>
+              <span class="form-hint">Mililitros</span>
+            </label>
+            <input type="number" id="ext-inp-vol" class="form-input" style="font-size: 20px; font-weight: 800; color: var(--primary);" value="60" min="5" max="350" step="5" required>
+            
+            <div class="quick-vol-buttons">
+              <button type="button" class="quick-vol-btn" data-val="30">+30 ml (1 oz)</button>
+              <button type="button" class="quick-vol-btn" data-val="60">+60 ml (2 oz)</button>
+              <button type="button" class="quick-vol-btn" data-val="90">+90 ml (3 oz)</button>
+              <button type="button" class="quick-vol-btn" data-val="120">+120 ml (4 oz)</button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Destino de Almacenamiento Térmico</label>
+            <select id="ext-sel-temp" class="form-select" onchange="UIController.updateExtractionPreview()">
+              <option value="Refrigerador_4C">Refrigerador Doméstico (4 °C) - Hasta 4 días</option>
+              <option value="Congelador_18C">Congelador Independiente (-18 °C) - 3 a 6 meses</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Fecha y Hora del Evento</label>
+            <input type="datetime-local" id="ext-inp-datetime" class="form-input">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Notas Clínicas u Observaciones (Opcional)</label>
+            <textarea id="ext-inp-notes" class="form-textarea" rows="2" placeholder="Ej. Extracción post-toma, seno derecho, frasco de vidrio estéril."></textarea>
+          </div>
+
+          <!-- Preview de Equivalencia -->
+          <div class="equiv-tile" style="margin-bottom: 20px;">
+            <div class="equiv-tile-icon" style="font-weight: 800; font-size: 13px; color: var(--primary);">LOTE</div>
+            <div class="equiv-tile-body">
+              <div class="equiv-tile-val" id="ext-preview-text">Calculando equivalencias...</div>
+              <div class="equiv-tile-desc">Asignación secuencial de lote con estampa temporal inmutable.</div>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-primary">
+            Guardar Lote en Inventario FIFO
+          </button>
+        </form>
+      </section>
+
+      <!-- ---------------------------------------------------------------------
+           PANTALLA 4: CALCULADORA VOLUMÉTRICA Y CONVERSOR PRÁCTICO
+           --------------------------------------------------------------------- -->
+      <section id="screen-calculator" class="app-screen">
+        <div class="hero-header" style="background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);">
+          <span class="hero-tag">Dosificación Pediátrica</span>
+          <h2 class="hero-title">Calculadora y Conversor Doméstico</h2>
+          <p class="hero-desc">Basado en la regla biomédica internacional de 150 ml/kg/día para lactantes sanos.</p>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">
+            <span>Peso del Lactante</span>
+            <span class="form-hint" id="calc-peso-display">3,200 g (3.2 kg)</span>
+          </label>
+          <input type="range" id="calc-inp-peso" class="form-input" min="1500" max="8000" step="50" value="3200">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">
+            <span>Tomas Diarias Sugeridas</span>
+            <span class="form-hint">8 tomas al día (cada 3 horas)</span>
+          </label>
+          <input type="range" id="calc-inp-tomas" class="form-input" min="6" max="12" step="1" value="8">
+        </div>
+
+        <!-- Resultado Pediátrico Principal -->
+        <div class="calc-result-box">
+          <div class="calc-result-title">Volumen Recomendado por Toma</div>
+          <div class="calc-result-value" id="calc-res-toma-ml">60 ml / toma</div>
+          <div class="calc-result-meta" id="calc-res-total-dia">Requerimiento diario: 480 ml en 8 tomas</div>
+        </div>
+
+        <!-- Equivalencias en Utensilios Domésticos -->
+        <div class="form-label" style="margin-bottom: 8px;">Equivalencias Prácticas para Cuidadores:</div>
+        
+        <div class="equiv-grid">
+          <div class="equiv-tile">
+            <div class="equiv-tile-icon" style="font-weight: 700; font-size: 11px;">fl oz</div>
+            <div class="equiv-tile-body">
+              <div class="equiv-tile-val" id="calc-equiv-oz">2.0 fl oz</div>
+              <div class="equiv-tile-desc">Medida estándar en biberones graduados</div>
+            </div>
+          </div>
+
+          <div class="equiv-tile">
+            <div class="equiv-tile-icon" style="font-weight: 700; font-size: 11px;">10 ml</div>
+            <div class="equiv-tile-body">
+              <div class="equiv-tile-val" id="calc-equiv-jeringa">6.0 jeringas de 10 ml</div>
+              <div class="equiv-tile-desc">Alimentación con jeringa-dedo para evitar confusión pezón-tetina</div>
+            </div>
+          </div>
+
+          <div class="equiv-tile">
+            <div class="equiv-tile-icon" style="font-weight: 700; font-size: 11px;">5 ml</div>
+            <div class="equiv-tile-body">
+              <div class="equiv-tile-val" id="calc-equiv-cuch">12 cucharaditas (5 ml c/u)</div>
+              <div class="equiv-tile-desc">Cucharitas dosificadoras de puericultura estandarizadas</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------------------------------------------------------------------
+           PANTALLA 5: CALENDARIO SEMAFÓRICO DE FRESCURA
+           --------------------------------------------------------------------- -->
+      <section id="screen-calendar" class="app-screen">
+        <div class="hero-header" style="background: linear-gradient(135deg, #0F766E 0%, #115E59 100%);">
+          <span class="hero-tag">Vigilancia Semafórica</span>
+          <h2 class="hero-title">Calendario de Frescura</h2>
+          <p class="hero-desc">Monitoreo cromático del banco de leche según las ventanas de estabilidad térmica.</p>
+        </div>
+
+        <div class="calendar-card">
+          <div class="cal-header-bar">
+            <button class="cal-nav-btn" onclick="UIController.changeCalendarMonth(-1)">Ant</button>
+            <div class="cal-month-title" id="calendar-month-title">Octubre 2026</div>
+            <button class="cal-nav-btn" onclick="UIController.changeCalendarMonth(1)">Sig</button>
+          </div>
+
+          <div class="cal-weekdays">
+            <div>Do</div><div>Lu</div><div>Ma</div><div>Mi</div><div>Ju</div><div>Vi</div><div>Sá</div>
+          </div>
+
+          <div class="cal-days-grid" id="calendar-days-grid">
+            <!-- Inyectado por UIController -->
+          </div>
+
+          <div class="cal-legend-bar">
+            <div class="cal-legend-item">
+              <span class="cal-dot green"></span> Verde: &lt;48h (Óptimo)
+            </div>
+            <div class="cal-legend-item">
+              <span class="cal-dot yellow"></span> Amarillo: 48-72h (Prioritario)
+            </div>
+            <div class="cal-legend-item">
+              <span class="cal-dot red"></span> Rojo: &gt;72h (Descarte)
+            </div>
+          </div>
+        </div>
+
+        <div id="calendar-selected-details">
+          <!-- Detalles del día seleccionado -->
+        </div>
+      </section>
+
+      <!-- ---------------------------------------------------------------------
+           PANTALLA 6: GUÍA DE TEMPERADO BIOSEGURO Y TEMPORIZADOR
+           --------------------------------------------------------------------- -->
+      <section id="screen-thawing" class="app-screen">
+        <div class="hero-header" style="background: linear-gradient(135deg, #0284C7 0%, #0369A1 100%);">
+          <span class="hero-tag">Protocolo de Bioseguridad</span>
+          <h2 class="hero-title">Temperado y Descongelación</h2>
+          <p class="hero-desc">Directrices hospitalarias de la OMS y el MSP para proteger las inmunoglobulinas.</p>
+        </div>
+
+        <div class="protocol-steps-list">
+          <div class="protocol-step-box">
+            <div class="step-num-bubble">1</div>
+            <div class="step-content-box">
+              <h4>Descongelación Gradual en Frío</h4>
+              <p>Bajar el frasco del congelador al refrigerador (4 °C) 12 horas antes. Esto preserva la estructura de los glóbulos grasos y enzimas digestivas.</p>
+            </div>
+          </div>
+
+          <div class="protocol-step-box danger-prohibition">
+            <div class="step-num-bubble">!</div>
+            <div class="step-content-box">
+              <h4>PROHIBICIÓN ESTRICTA: Microondas o Fuego Directo</h4>
+              <p>El calentamiento desigual destruye la lactoferrina y los anticuerpos sIgA, además de crear puntos calientes que provocan quemaduras severas en la mucosa oral del bebé.</p>
+            </div>
+          </div>
+
+          <div class="protocol-step-box">
+            <div class="step-num-bubble">3</div>
+            <div class="step-content-box">
+              <h4>Baño María Pasivo Tibio</h4>
+              <p>Calentar agua en una olla, <strong>retirarla de la fuente de calor</strong> y sumergir el recipiente de leche durante 10 a 12 minutos para atemperarlo suavemente.</p>
+            </div>
+          </div>
+
+          <div class="protocol-step-box">
+            <div class="step-num-bubble">4</div>
+            <div class="step-content-box">
+              <h4>Prueba Térmica y Consumo &lt; 2 Horas</h4>
+              <p>Comprobar una gota en el dorso de la muñeca. La leche temperada debe ser administrada en menos de 2 horas. <strong>Jamás volver a congelar un frasco temperado.</strong></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Temporizador Interactivo de Baño María Pasivo -->
+        <div class="timer-interactive-card">
+          <div style="font-size: 13px; font-weight: 700; color: var(--neutral-600); text-transform: uppercase;">
+            Temporizador de Baño María Pasivo (10 min)
+          </div>
+          <div class="timer-digits" id="timer-display">10:00</div>
+          <div class="timer-controls-row">
+            <button class="btn-timer" id="btn-timer-start" onclick="UIController.toggleTimer()">Iniciar (10 min)</button>
+            <button class="btn-timer btn-reset" onclick="UIController.resetTimer()">Reiniciar</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------------------------------------------------------------------
+           PANTALLA 7: EVALUADOR VISUAL DE ALARMA NEONATAL (TRIAJE CLÍNICO)
+           --------------------------------------------------------------------- -->
+      <section id="screen-triage" class="app-screen">
+        <div class="hero-header" style="background: linear-gradient(135deg, #BE123C 0%, #881337 100%);">
+          <span class="hero-tag">Tamizaje Clínico AIEPI / OMS</span>
+          <h2 class="hero-title">Evaluador de Alarma Neonatal</h2>
+          <p class="hero-desc">Detección oportuna de deshidratación aguda y desnutrición en lactantes de 0 a 6 meses.</p>
+        </div>
+
+        <div class="triage-questions-list">
+          <!-- Tarjeta 1: Fontanela -->
+          <div class="triage-card">
+            <div class="triage-card-header">
+              <span class="triage-card-badge">1</span>
+              <span class="triage-card-title">Fontanela Anterior (Mollera Superior)</span>
+            </div>
+            <div class="triage-illustration-box">
+              <div class="triage-svg-preview">1</div>
+              <div class="triage-illus-desc">Palpar suavemente la parte superior de la cabeza del lactante mientras se encuentra erguido y en calma.</div>
+            </div>
+            <div class="triage-buttons-group">
+              <button type="button" class="triage-option-btn selected-normal" onclick="UIController.setTriageAnswer('fontanela', 'normal', this)">
+                <strong>Opción A (Normal):</strong> Plana, normotensa, pulso sutil suave.
+              </button>
+              <button type="button" class="triage-option-btn" onclick="UIController.setTriageAnswer('fontanela', 'alert', this)">
+                <strong>Opción B (Alerta Temprana):</strong> Leve concavidad por debajo de bordes óseos.
+              </button>
+              <button type="button" class="triage-option-btn" onclick="UIController.setTriageAnswer('fontanela', 'danger', this)">
+                <strong>Opción C (Emergencia):</strong> Depresión profunda en copa (&gt; 3 mm de hendidura).
+              </button>
+            </div>
+          </div>
+
+          <!-- Tarjeta 2: Mucosas Orales -->
+          <div class="triage-card">
+            <div class="triage-card-header">
+              <span class="triage-card-badge">2</span>
+              <span class="triage-card-title">Mucosas Orales y Presencia de Saliva</span>
+            </div>
+            <div class="triage-illustration-box">
+              <div class="triage-svg-preview">2</div>
+              <div class="triage-illus-desc">Examinar los labios, encías y lengua del bebé con iluminación adecuada.</div>
+            </div>
+            <div class="triage-buttons-group">
+              <button type="button" class="triage-option-btn selected-normal" onclick="UIController.setTriageAnswer('mucosas', 'normal', this)">
+                <strong>Opción A (Normal):</strong> Labios rosados húmedos y saliva fluida abundante.
+              </button>
+              <button type="button" class="triage-option-btn" onclick="UIController.setTriageAnswer('mucosas', 'alert', this)">
+                <strong>Opción B (Alerta Temprana):</strong> Labios pegajosos, saliva escasa o espesa.
+              </button>
+              <button type="button" class="triage-option-btn" onclick="UIController.setTriageAnswer('mucosas', 'danger', this)">
+                <strong>Opción C (Emergencia):</strong> Totalmente secas, lengua áspera y cuarteada sin saliva.
+              </button>
+            </div>
+          </div>
+
+          <!-- Tarjeta 3: Signo del Pliegue -->
+          <div class="triage-card">
+            <div class="triage-card-header">
+              <span class="triage-card-badge">3</span>
+              <span class="triage-card-title">Turgencia Cutánea (Signo del Pliegue)</span>
+            </div>
+            <div class="triage-illustration-box">
+              <div class="triage-svg-preview">3</div>
+              <div class="triage-illus-desc">Pellizcar suavemente la piel del abdomen o cara anterior del muslo y soltar.</div>
+            </div>
+            <div class="triage-buttons-group">
+              <button type="button" class="triage-option-btn selected-normal" onclick="UIController.setTriageAnswer('pliegue', 'normal', this)">
+                <strong>Opción A (Normal):</strong> Retorno inmediato en menos de 1 segundo.
+              </button>
+              <button type="button" class="triage-option-btn" onclick="UIController.setTriageAnswer('pliegue', 'alert', this)">
+                <strong>Opción B (Alerta Temprana):</strong> Retorno lento entre 1 y 2 segundos.
+              </button>
+              <button type="button" class="triage-option-btn" onclick="UIController.setTriageAnswer('pliegue', 'danger', this)">
+                <strong>Opción C (Emergencia):</strong> Muy lento (&gt; 2 s, pliegue en tienda de campaña).
+              </button>
+            </div>
+          </div>
+
+          <!-- Tarjeta 4: Enoftalmos y Lágrimas -->
+          <div class="triage-card">
+            <div class="triage-card-header">
+              <span class="triage-card-badge">4</span>
+              <span class="triage-card-title">Globos Oculares y Presencia de Lágrimas</span>
+            </div>
+            <div class="triage-illustration-box">
+              <div class="triage-svg-preview">4</div>
+              <div class="triage-illus-desc">Observar la expresión facial y la presencia de lágrimas visibles durante el llanto.</div>
+            </div>
+            <div class="triage-buttons-group">
+              <button type="button" class="triage-option-btn selected-normal" onclick="UIController.setTriageAnswer('ojos', 'normal', this)">
+                <strong>Opción A (Normal):</strong> Ojos vivos y brillantes con lágrimas claras al llorar.
+              </button>
+              <button type="button" class="triage-option-btn" onclick="UIController.setTriageAnswer('ojos', 'alert', this)">
+                <strong>Opción B (Alerta Temprana):</strong> Ojos ligeramente opacos o hundidos, lágrimas escasas.
+              </button>
+              <button type="button" class="triage-option-btn" onclick="UIController.setTriageAnswer('ojos', 'danger', this)">
+                <strong>Opción C (Emergencia):</strong> Cuencas profundamente hundidas, ojeras y llanto sin lágrimas.
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Banner de Diagnóstico Clínico Dinámico -->
+        <div id="triage-result-card" class="triage-diagnosis-box show state-green">
+          <div class="diag-title">ESTADO CLÍNICO ÓPTIMO (HIDRATADO)</div>
+          <div class="diag-desc">No se aprecian signos de alarma. Continuar con la lactancia materna exclusiva a libre demanda.</div>
+        </div>
+
+        <div style="margin-top: 16px;">
+          <button class="btn-primary" onclick="UIController.saveTriageEvaluation()">
+            Guardar Evaluación en Historial Clínico
+          </button>
+        </div>
+      </section>
+
+      <!-- ---------------------------------------------------------------------
+           PANTALLA 8: PERFIL, CONFIGURACIÓN Y REPORTES PEDIÁTRICOS
+           --------------------------------------------------------------------- -->
+      <section id="screen-profile" class="app-screen">
+        <div class="hero-header" style="background: linear-gradient(135deg, #334155 0%, #1E293B 100%);">
+          <span class="hero-tag">Gestión del Sistema y Reportes</span>
+          <h2 class="hero-title">Configuración y Exportación</h2>
+          <p class="hero-desc">Herramientas de reporte para el pediatra y sincronización del proyecto COIL.</p>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Nombre del Lactante</label>
+          <input type="text" class="form-input" value="Sofía" id="prof-inp-babyname">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Rol del Cuidador Principal</label>
+          <select class="form-select">
+            <option value="Madre_Primeriza">Madre Primeriza</option>
+            <option value="Monoparental">Familia Monoparental</option>
+            <option value="Red_Apoyo">Red de Apoyo Familiar (Abuelos / Pareja)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Teléfono de Emergencias Pediátricas</label>
+          <input type="text" class="form-input" value="911" id="prof-inp-phone">
+        </div>
+
+        <div style="margin-top: 24px; display: flex; flex-direction: column; gap: 10px;">
+          <button class="btn-primary" onclick="UIController.generateClinicalPrintReport()">
+            Generar e Imprimir Reporte para el Pediatra
+          </button>
+
+          <button class="btn-secondary" onclick="UIController.showToast('Datos exportados en JSON correctamente.');">
+            Exportar Respaldo Local (JSON)
+          </button>
+
+          <button class="btn-secondary" style="color: #991B1B; border-color: #FECACA;" onclick="if(confirm('¿Restablecer datos de prueba del proyecto COIL?')) { StorageManager.resetAll(); UIController.refreshAllUI(); UIController.showToast('Datos restablecidos.'); }">
+            Restablecer Datos de Demostración COIL
+          </button>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- =========================================================================
+       MODAL DE CONSUMO Y DESPACHO DE LOTE
+       ========================================================================= -->
+  <div id="consume-modal" class="modal-backdrop">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div class="modal-title">Despacho de Frasco (FIFO)</div>
+        <button class="btn-close-modal" onclick="UIController.closeConsumeModal()">X</button>
+      </div>
+
+      <input type="hidden" id="modal-consume-lote-id">
+      
+      <p style="font-size: 13px; color: var(--neutral-600); margin-bottom: 14px;">
+        Vas a suministrar el <strong id="modal-consume-lotename">LOTE</strong> según el orden de rotación FIFO.
+      </p>
+
+      <div class="form-group">
+        <label class="form-label">Volumen Suministrado (ml)</label>
+        <input type="number" id="modal-consume-vol" class="form-input" style="font-size: 18px; font-weight: 700;">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Tiempo de Temperado Pasivo (minutos)</label>
+        <input type="number" id="modal-consume-time" class="form-input" value="10">
+      </div>
+
+      <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
+        <input type="checkbox" id="modal-consume-temp-check" checked style="width: 18px; height: 18px;">
+        <label for="modal-consume-temp-check" style="font-size: 12.5px; font-weight: 600; color: var(--neutral-700);">
+          He verificado la temperatura en el dorso de la muñeca
+        </label>
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-top: 18px;">
+        <button class="btn-secondary" onclick="UIController.closeConsumeModal()">Cancelar</button>
+        <button class="btn-primary" onclick="UIController.confirmConsumeFromModal()">Confirmar Toma Suministrada</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       CONTENEDOR DE NOTIFICACIONES TOAST
+       ========================================================================= -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- =========================================================================
+       CONTENEDOR IMPRIMIBLE (REPORTE PEDIÁTRICO PARA WINDOWS PRINT)
+       ========================================================================= -->
+  <div id="clinical-print-report"></div>
+
+  <!-- Script Principal de la Aplicación -->
+  <script src="app.js"></script>
+</body>
+</html>

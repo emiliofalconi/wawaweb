@@ -1,0 +1,17 @@
+# Binarios compilados
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Temporales de sistema
+.DS_Store
+Thumbs.db
+*.log
+temp_*
+
+# Carpetas de dependencias / cache
+node_modules/
+__pycache__/
+*.pyc
