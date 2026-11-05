@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>WawaWeb - Plataforma de Gestión de Banco de Leche y Alarma Neonatal (COIL 202715)</title>
   
   <!-- Tipografía Google Fonts -->
@@ -31,7 +31,7 @@
 
     <div class="top-meta">
       <div class="coil-pill" id="header-baby-pill" style="display: none;">
-        <span>Paciente: <span class="baby-display-name">---</span> (<span id="header-baby-days">--</span> d)</span>
+        <span><span class="coil-pill-label">Paciente: </span><span class="baby-display-name">---</span> (<span id="header-baby-days">--</span> d)</span>
       </div>
       
       <div class="user-profile-badge" id="header-user-badge" style="display: none;">
@@ -40,7 +40,7 @@
         <button class="btn-logout-tiny" onclick="AuthController.logout()" title="Cerrar Sesión">Salir</button>
       </div>
 
-      <button class="btn-primary" id="header-btn-login" onclick="UIController.switchScreen('screen-auth')" style="display: none; padding: 5px 12px; font-size: 12px;">
+      <button class="btn-primary header-btn-login" id="header-btn-login" onclick="UIController.switchScreen('screen-auth')" style="display: none;">
         Entrar
       </button>
 
@@ -169,7 +169,7 @@
                 <input type="text" id="reg-babyname" class="form-input" placeholder="Nombre del lactante" required>
               </div>
               <div class="form-group">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 4px;">
                   <label class="form-label" for="reg-birthdate" style="margin-bottom: 0;">Fecha de Nacimiento</label>
                   <span id="reg-calc-days-hint" style="font-size: 0.78rem; font-weight: 600; color: #0284C7; background: #E0F2FE; padding: 2px 8px; border-radius: 6px;">
                     Edad: -- días
@@ -181,7 +181,7 @@
 
             <div class="form-row-2">
               <div class="form-group">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 4px;">
                   <label class="form-label" for="reg-weight" style="margin-bottom: 0;">Peso Actual (gramos)</label>
                   <span style="font-size: 0.74rem; color: #64748B;">1.500 g - 12.000 g</span>
                 </div>
@@ -429,7 +429,7 @@
           <p class="hero-desc">Registro detallado de tomas administradas, volúmenes, métodos y temperado pasivo.</p>
         </div>
 
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
           <span style="font-size: 13px; font-weight: 700; color: var(--neutral-700);">Tomas Registradas</span>
           <button class="btn-secondary" style="padding: 6px 12px; font-size: 12px;" onclick="UIController.openDirectIntakeModal()">
             + Registrar Toma
@@ -525,7 +525,7 @@
           <p class="hero-desc">Basado en la regla biomédica internacional de 150 ml/kg/día para lactantes sanos.</p>
         </div>
 
-        <div id="calc-baby-info-chip" style="font-size: 0.82rem; font-weight: 600; color: #1D4ED8; background: #DBEAFE; padding: 6px 12px; border-radius: 6px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center;">
+        <div id="calc-baby-info-chip" style="font-size: 0.82rem; font-weight: 600; color: #1D4ED8; background: #DBEAFE; padding: 6px 12px; border-radius: 6px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
           <span>Lactante: Cargando datos...</span>
         </div>
 
@@ -842,7 +842,7 @@
 
         <!-- Estado de Conexión con Base de Datos -->
         <div style="background: #FFFFFF; border: 1px solid var(--neutral-200); border-radius: var(--radius-md); padding: 16px; margin-bottom: 20px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 6px;">
             <strong style="font-size: 13.5px; color: var(--neutral-800);">Motor de Base de Datos y Sesión</strong>
             <span id="profile-db-status" class="db-status-badge online">● SQLite 3FN Conectado</span>
           </div>
@@ -937,7 +937,7 @@
         Vas a suministrar el <strong id="modal-consume-lotename">LOTE</strong> según el orden de rotación FIFO.
       </p>
 
-      <div style="margin-bottom: 14px; padding: 10px 12px; background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 8px; font-size: 12.5px; color: #166534; display: flex; justify-content: space-between; align-items: center;">
+      <div style="margin-bottom: 14px; padding: 10px 12px; background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 8px; font-size: 12.5px; color: #166534; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
         <span>🌡️ ¿Deseas temperar el frasco primero?</span>
         <button type="button" class="btn-secondary" style="font-size: 11.5px; padding: 4px 10px; background: white;" onclick="UIController.goToThawingFromModal()">Abrir Temporizador (10 min)</button>
       </div>
@@ -969,7 +969,7 @@
         </label>
       </div>
 
-      <div style="display: flex; gap: 10px; margin-top: 18px;">
+      <div class="modal-footer-actions" style="display: flex; gap: 10px; margin-top: 18px;">
         <button class="btn-secondary" onclick="UIController.closeConsumeModal()">Cancelar</button>
         <button class="btn-primary" onclick="UIController.confirmConsumeFromModal()">Confirmar Toma Suministrada</button>
       </div>
@@ -991,7 +991,7 @@
         <div style="font-size: 11px; font-weight: 800; color: #0284C7; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.04em;">
           📝 Datos para Rotular en el Frasco / Bolsa Física:
         </div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 13px; color: #1E293B;">
+        <div class="label-info-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 13px; color: #1E293B;">
           <div><strong>Identificador:</strong> <span id="label-modal-tag" style="color: #0284C7; font-weight: 800;">LOTE #01</span></div>
           <div><strong>Volumen:</strong> <span id="label-modal-vol" style="font-weight: 700;">60 ml</span></div>
           <div><strong>Fecha:</strong> <span id="label-modal-date">--</span></div>
