@@ -15,3 +15,10 @@ temp_*
 node_modules/
 __pycache__/
 *.pyc
+
+# Base de datos SQLite y temporales WAL
+*.db
+*.db-shm
+*.db-wal
+
+.vercel

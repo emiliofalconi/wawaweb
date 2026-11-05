@@ -30,9 +30,20 @@
     </div>
 
     <div class="top-meta">
-      <div class="coil-pill">
-        <span>Paciente: <span class="baby-display-name">Sofía</span> (15 d)</span>
+      <div class="coil-pill" id="header-baby-pill" style="display: none;">
+        <span>Paciente: <span class="baby-display-name">---</span> (<span id="header-baby-days">--</span> d)</span>
       </div>
+      
+      <div class="user-profile-badge" id="header-user-badge" style="display: none;">
+        <span class="user-avatar-tiny" id="header-user-avatar">👤</span>
+        <span class="user-name-label" id="header-user-name">Usuario</span>
+        <button class="btn-logout-tiny" onclick="AuthController.logout()" title="Cerrar Sesión">Salir</button>
+      </div>
+
+      <button class="btn-primary" id="header-btn-login" onclick="UIController.switchScreen('screen-auth')" style="display: none; padding: 5px 12px; font-size: 12px;">
+        Entrar
+      </button>
+
       <button class="notification-bell-btn" onclick="UIController.switchScreen('screen-inventory')" title="Lotes en Alerta">
         <svg class="icon-svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
@@ -46,7 +57,8 @@
   <!-- =========================================================================
        BARRA DE PANTALLAS (SUB-NAVBAR)
        ========================================================================= -->
-  <nav class="screens-nav-bar">
+  <nav class="screens-nav-bar" id="main-nav-bar">
+    <button class="nav-tab-btn" data-screen="screen-auth" id="nav-btn-auth" style="display: none;">Iniciar Sesión</button>
     <button class="nav-tab-btn active" data-screen="screen-dashboard">Dashboard FIFO</button>
     <button class="nav-tab-btn" data-screen="screen-inventory">Banco de Leche</button>
     <button class="nav-tab-btn" data-screen="screen-extraction">Nueva Extracción</button>
@@ -64,13 +76,157 @@
     <div class="device-frame">
 
       <!-- ---------------------------------------------------------------------
+           PANTALLA 0: INICIO DE SESIÓN Y REGISTRO (AUTENTICACIÓN ASISTENCIAL)
+           --------------------------------------------------------------------- -->
+      <section id="screen-auth" class="app-screen">
+        <div class="auth-container">
+          <div class="auth-header">
+            <div class="auth-logo-badge">WawaWeb</div>
+            <h2 class="auth-title">Plataforma de Salud Digital</h2>
+            <p class="auth-subtitle">Gestión Trazable de Banco de Leche (FIFO) y Alarma Neonatal Temprana</p>
+          </div>
+
+          <!-- Pestañas Iniciar Sesión / Crear Cuenta -->
+          <div class="auth-tabs">
+            <button type="button" class="auth-tab-btn active" id="tab-btn-login" onclick="AuthController.switchTab('login')">
+              Iniciar Sesión
+            </button>
+            <button type="button" class="auth-tab-btn" id="tab-btn-register" onclick="AuthController.switchTab('register')">
+              Crear Cuenta
+            </button>
+          </div>
+
+          <!-- Notificaciones de Alerta -->
+          <div id="auth-alert-box" class="auth-alert" style="display: none;"></div>
+
+          <!-- Formulario de Iniciar Sesión -->
+          <form id="form-login" onsubmit="AuthController.handleLogin(event)">
+            <div class="form-group">
+              <label class="form-label" for="login-email">Correo Electrónico</label>
+              <input type="email" id="login-email" class="form-input" placeholder="correo@ejemplo.com" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="login-password">Contraseña</label>
+              <input type="password" id="login-password" class="form-input" placeholder="Tu contraseña" required>
+            </div>
+
+            <div class="auth-actions" style="margin-top: 18px;">
+              <button type="submit" class="btn-primary" id="btn-submit-login" style="width: 100%;">
+                Acceder al Sistema Asistencial
+              </button>
+            </div>
+
+            <div class="auth-divider">
+              <span>O ACCESO DE EVALUACIÓN</span>
+            </div>
+
+            <button type="button" class="btn-demo-quick" onclick="AuthController.loginDemo()">
+              ⚡ Acceso Rápido Demo (1 Clic)
+            </button>
+          </form>
+
+          <!-- Formulario de Registro -->
+          <form id="form-register" style="display: none;" onsubmit="AuthController.handleRegister(event)">
+            <div class="auth-section-title">1. Datos del Cuidador / Usuario</div>
+            
+            <div class="form-group">
+              <label class="form-label" for="reg-fullname">Nombre Completo del Cuidador</label>
+              <input type="text" id="reg-fullname" class="form-input" placeholder="Nombre y Apellido" required>
+            </div>
+
+            <div class="form-row-2">
+              <div class="form-group">
+                <label class="form-label" for="reg-email">Correo Electrónico</label>
+                <input type="email" id="reg-email" class="form-input" placeholder="correo@ejemplo.com" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="reg-password">Contraseña (mín. 6 caracteres)</label>
+                <input type="password" id="reg-password" class="form-input" placeholder="Mínimo 6 caracteres" minlength="6" required>
+              </div>
+            </div>
+
+            <div class="form-row-2">
+              <div class="form-group">
+                <label class="form-label" for="reg-role">Rol del Cuidador</label>
+                <select id="reg-role" class="form-select">
+                  <option value="Madre_Primeriza">Madre Primeriza</option>
+                  <option value="Monoparental">Monoparental</option>
+                  <option value="Red_Apoyo">Red de Apoyo</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="reg-phone">Teléfono de Emergencia</label>
+                <input type="text" id="reg-phone" class="form-input" placeholder="911 o teléfono de cabecera">
+              </div>
+            </div>
+
+            <div class="auth-section-title">2. Ficha Neonatal del Lactante</div>
+
+            <div class="form-row-2">
+              <div class="form-group">
+                <label class="form-label" for="reg-babyname">Nombre del Bebé</label>
+                <input type="text" id="reg-babyname" class="form-input" placeholder="Nombre del lactante" required>
+              </div>
+              <div class="form-group">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                  <label class="form-label" for="reg-birthdate" style="margin-bottom: 0;">Fecha de Nacimiento</label>
+                  <span id="reg-calc-days-hint" style="font-size: 0.78rem; font-weight: 600; color: #0284C7; background: #E0F2FE; padding: 2px 8px; border-radius: 6px;">
+                    Edad: -- días
+                  </span>
+                </div>
+                <input type="date" id="reg-birthdate" class="form-input" required onchange="AuthController.onBirthDateChange(this.value)" oninput="AuthController.onBirthDateChange(this.value)">
+              </div>
+            </div>
+
+            <div class="form-row-2">
+              <div class="form-group">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                  <label class="form-label" for="reg-weight" style="margin-bottom: 0;">Peso Actual (gramos)</label>
+                  <span style="font-size: 0.74rem; color: #64748B;">1.500 g - 12.000 g</span>
+                </div>
+                <input type="number" id="reg-weight" class="form-input" placeholder="Ej. 3200 (1500 a 12000)" min="1500" max="12000" step="10" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="reg-sex">Sexo</label>
+                <select id="reg-sex" class="form-select">
+                  <option value="Femenino">Femenino</option>
+                  <option value="Masculino">Masculino</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Consentimiento Informado Obligatorio -->
+            <div class="form-group consent-card" style="margin-top: 14px; padding: 12px 14px; background: #F8FAFC; border: 1px solid #CBD5E1; border-radius: 8px;">
+              <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer; font-size: 0.85rem; color: #334155; line-height: 1.4;">
+                <input type="checkbox" id="reg-consent" required style="margin-top: 2px; width: 18px; height: 18px; accent-color: #0284C7; flex-shrink: 0;">
+                <span>
+                  <strong>Consentimiento Informado:</strong> Acepto el consentimiento informado para el registro asistencial, monitoreo de lactancia y gestión de datos de salud neonatal (Protocolo COIL 202715 • UCAB / PUCE).
+                </span>
+              </label>
+            </div>
+
+            <div class="auth-actions" style="margin-top: 18px;">
+              <button type="submit" class="btn-primary" id="btn-submit-reg" style="width: 100%;">
+                Crear Cuenta y Comenzar
+              </button>
+            </div>
+          </form>
+
+          <div class="auth-footer-note">
+            <span>Proyecto de Cooperación Académica COIL 202715</span> • <span>UCAB Venezuela • PUCE Ecuador</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------------------------------------------------------------------
            PANTALLA 1: DASHBOARD ASISTENCIAL (FIFO & STOCK)
            --------------------------------------------------------------------- -->
       <section id="screen-dashboard" class="app-screen active-screen">
         <div class="hero-header">
           <span class="hero-tag">Seguimiento Clínico y Logístico</span>
-          <h2 class="hero-title">Lactante: <span class="baby-display-name">Sofía</span></h2>
-          <p class="hero-desc">15 días de vida • 3,200 g • Régimen: Lactancia Materna Exclusiva</p>
+          <h2 class="hero-title">Lactante: <span class="baby-display-name">---</span></h2>
+          <p class="hero-desc" id="dash-baby-meta">Cargando datos clínicos desde la base de datos...</p>
         </div>
 
         <!-- Stock Disponible (ml y oz) -->
@@ -78,7 +234,10 @@
           <div class="stock-stat-box">
             <div class="stat-value" id="dash-stock-ml">0 ml</div>
             <div class="stat-label">Stock Total Disponible</div>
-            <span class="stat-badge badge-refrigerado" id="dash-refri-badge">Refri: 0 ml</span>
+            <div style="display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap;">
+              <span class="stat-badge badge-refrigerado" id="dash-refri-badge">Refri: 0 ml</span>
+              <span class="stat-badge" id="dash-ambiente-badge" style="display: none; background: #FEF3C7; color: #92400E; border: 1px solid #FCD34D;">Ambiente: 0 ml</span>
+            </div>
           </div>
           <div class="stock-stat-box">
             <div class="stat-value" id="dash-stock-oz">0.0 oz</div>
@@ -86,6 +245,9 @@
             <span class="stat-badge badge-congelado" id="dash-freezer-badge">Congelador: 0 ml</span>
           </div>
         </div>
+
+        <!-- Alerta Proactiva (≥48 horas en Refrigerador) -->
+        <div id="dash-proactive-alert" style="display: none; margin-bottom: 16px;"></div>
 
         <!-- Tarjeta del Frasco Prioritario Hoy (FIFO) -->
         <div id="dash-fifo-container">
@@ -134,6 +296,7 @@
         <!-- Chips de Filtro -->
         <div class="inventory-filters-row">
           <button class="filter-chip-btn active" data-filter="all">Todos los Activos</button>
+          <button class="filter-chip-btn" data-filter="ambiente">Ambiente</button>
           <button class="filter-chip-btn" data-filter="refri">Refrigerador (4 °C)</button>
           <button class="filter-chip-btn" data-filter="freezer">Congelador (-18 °C)</button>
           <button class="filter-chip-btn" data-filter="consumed">Historial Consumidos</button>
@@ -167,7 +330,7 @@
               <span>Volumen Extraído</span>
               <span class="form-hint">Mililitros</span>
             </label>
-            <input type="number" id="ext-inp-vol" class="form-input" style="font-size: 20px; font-weight: 800; color: var(--primary);" value="60" min="5" max="350" step="5" required>
+            <input type="number" id="ext-inp-vol" class="form-input" style="font-size: 20px; font-weight: 800; color: var(--primary);" placeholder="Ej. 60" min="5" max="500" step="5" required>
             
             <div class="quick-vol-buttons">
               <button type="button" class="quick-vol-btn" data-val="30">+30 ml (1 oz)</button>
@@ -180,32 +343,33 @@
           <div class="form-group">
             <label class="form-label">Destino de Almacenamiento Térmico</label>
             <select id="ext-sel-temp" class="form-select" onchange="UIController.updateExtractionPreview()">
-              <option value="Refrigerador_4C">Refrigerador Doméstico (4 °C) - Hasta 4 días</option>
-              <option value="Congelador_18C">Congelador Independiente (-18 °C) - 3 a 6 meses</option>
+              <option value="Ambiente">Ambiente (hasta 4 horas a ≤25 °C)</option>
+              <option value="Refrigerador_4C" selected>Refrigerador 4 °C (hasta 4 días / 96 h)</option>
+              <option value="Congelador_18C">Congelador -18 °C (3 a 6 meses)</option>
             </select>
           </div>
 
           <div class="form-group">
-            <label class="form-label">Fecha y Hora del Evento</label>
-            <input type="datetime-local" id="ext-inp-datetime" class="form-input">
+            <label class="form-label">Fecha y Hora de la Extracción</label>
+            <input type="datetime-local" id="ext-inp-datetime" class="form-input" required>
           </div>
 
           <div class="form-group">
             <label class="form-label">Notas Clínicas u Observaciones (Opcional)</label>
-            <textarea id="ext-inp-notes" class="form-textarea" rows="2" placeholder="Ej. Extracción post-toma, seno derecho, frasco de vidrio estéril."></textarea>
+            <textarea id="ext-inp-notes" class="form-textarea" rows="2" placeholder="Ej. Extracción matutina, seno derecho, frasco de vidrio estéril."></textarea>
           </div>
 
-          <!-- Preview de Equivalencia -->
+          <!-- Preview de Equivalencia y Asignación de Lote -->
           <div class="equiv-tile" style="margin-bottom: 20px;">
             <div class="equiv-tile-icon" style="font-weight: 800; font-size: 13px; color: var(--primary);">LOTE</div>
             <div class="equiv-tile-body">
-              <div class="equiv-tile-val" id="ext-preview-text">Calculando equivalencias...</div>
-              <div class="equiv-tile-desc">Asignación secuencial de lote con estampa temporal inmutable.</div>
+              <div class="equiv-tile-val" id="ext-preview-text">Calculando #Lote FIFO y equivalencias...</div>
+              <div class="equiv-tile-desc">Asignación secuencial de #Lote FIFO con estampa temporal inmutable para etiquetado físico.</div>
             </div>
           </div>
 
-          <button type="submit" class="btn-primary">
-            Guardar Lote en Inventario FIFO
+          <button type="submit" class="btn-primary" id="btn-submit-extraction">
+            Guardar Lote e Insertar en Cola FIFO
           </button>
         </form>
       </section>
@@ -220,10 +384,14 @@
           <p class="hero-desc">Basado en la regla biomédica internacional de 150 ml/kg/día para lactantes sanos.</p>
         </div>
 
+        <div id="calc-baby-info-chip" style="font-size: 0.82rem; font-weight: 600; color: #1D4ED8; background: #DBEAFE; padding: 6px 12px; border-radius: 6px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center;">
+          <span>Lactante: Cargando datos...</span>
+        </div>
+
         <div class="form-group">
           <label class="form-label">
             <span>Peso del Lactante</span>
-            <span class="form-hint" id="calc-peso-display">3,200 g (3.2 kg)</span>
+            <span class="form-hint" id="calc-peso-display">-- g</span>
           </label>
           <input type="range" id="calc-inp-peso" class="form-input" min="1500" max="8000" step="50" value="3200">
         </div>
@@ -239,8 +407,8 @@
         <!-- Resultado Pediátrico Principal -->
         <div class="calc-result-box">
           <div class="calc-result-title">Volumen Recomendado por Toma</div>
-          <div class="calc-result-value" id="calc-res-toma-ml">60 ml / toma</div>
-          <div class="calc-result-meta" id="calc-res-total-dia">Requerimiento diario: 480 ml en 8 tomas</div>
+          <div class="calc-result-value" id="calc-res-toma-ml">-- ml / toma</div>
+          <div class="calc-result-meta" id="calc-res-total-dia">Cargando requerimiento diario desde la base de datos...</div>
         </div>
 
         <!-- Equivalencias en Utensilios Domésticos -->
@@ -250,7 +418,7 @@
           <div class="equiv-tile">
             <div class="equiv-tile-icon" style="font-weight: 700; font-size: 11px;">fl oz</div>
             <div class="equiv-tile-body">
-              <div class="equiv-tile-val" id="calc-equiv-oz">2.0 fl oz</div>
+              <div class="equiv-tile-val" id="calc-equiv-oz">-- fl oz</div>
               <div class="equiv-tile-desc">Medida estándar en biberones graduados</div>
             </div>
           </div>
@@ -258,7 +426,7 @@
           <div class="equiv-tile">
             <div class="equiv-tile-icon" style="font-weight: 700; font-size: 11px;">10 ml</div>
             <div class="equiv-tile-body">
-              <div class="equiv-tile-val" id="calc-equiv-jeringa">6.0 jeringas de 10 ml</div>
+              <div class="equiv-tile-val" id="calc-equiv-jeringa">-- jeringas</div>
               <div class="equiv-tile-desc">Alimentación con jeringa-dedo para evitar confusión pezón-tetina</div>
             </div>
           </div>
@@ -266,7 +434,7 @@
           <div class="equiv-tile">
             <div class="equiv-tile-icon" style="font-weight: 700; font-size: 11px;">5 ml</div>
             <div class="equiv-tile-body">
-              <div class="equiv-tile-val" id="calc-equiv-cuch">12 cucharaditas (5 ml c/u)</div>
+              <div class="equiv-tile-val" id="calc-equiv-cuch">-- cucharaditas</div>
               <div class="equiv-tile-desc">Cucharitas dosificadoras de puericultura estandarizadas</div>
             </div>
           </div>
@@ -326,6 +494,10 @@
           <p class="hero-desc">Directrices hospitalarias de la OMS y el MSP para proteger las inmunoglobulinas.</p>
         </div>
 
+        <div id="thawing-current-lot-hint" style="display: none; background: #E0F2FE; border-left: 4px solid #0284C7; color: #0369A1; padding: 10px 14px; border-radius: 6px; font-weight: 700; font-size: 13px; margin-bottom: 14px;">
+          Preparando: Frasco Prioritario
+        </div>
+
         <div class="protocol-steps-list">
           <div class="protocol-step-box">
             <div class="step-num-bubble">1</div>
@@ -370,6 +542,12 @@
             <button class="btn-timer" id="btn-timer-start" onclick="UIController.toggleTimer()">Iniciar (10 min)</button>
             <button class="btn-timer btn-reset" onclick="UIController.resetTimer()">Reiniciar</button>
           </div>
+        </div>
+
+        <div style="margin-top: 18px;">
+          <button class="btn-primary" style="width: 100%;" onclick="UIController.finishThawingAndConsume()">
+            ✓ Leche Temperada Lista • Confirmar Consumo
+          </button>
         </div>
       </section>
 
@@ -495,28 +673,62 @@
            --------------------------------------------------------------------- -->
       <section id="screen-profile" class="app-screen">
         <div class="hero-header" style="background: linear-gradient(135deg, #334155 0%, #1E293B 100%);">
-          <span class="hero-tag">Gestión del Sistema y Reportes</span>
-          <h2 class="hero-title">Configuración y Exportación</h2>
-          <p class="hero-desc">Herramientas de reporte para el pediatra y sincronización del proyecto COIL.</p>
+          <span class="hero-tag">Gestión del Sistema y Base de Datos</span>
+          <h2 class="hero-title">Configuración y Reportes</h2>
+          <p class="hero-desc">Herramientas asistenciales, base de datos relacional y exportación clínica.</p>
+        </div>
+
+        <!-- Estado de Conexión con Base de Datos -->
+        <div style="background: #FFFFFF; border: 1px solid var(--neutral-200); border-radius: var(--radius-md); padding: 16px; margin-bottom: 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <strong style="font-size: 13.5px; color: var(--neutral-800);">Motor de Base de Datos y Sesión</strong>
+            <span id="profile-db-status" class="db-status-badge online">● SQLite 3FN Conectado</span>
+          </div>
+          <div style="font-size: 12.5px; color: var(--neutral-600); line-height: 1.5;">
+            <div><strong>Usuario Activo:</strong> <span id="prof-user-email">---</span></div>
+            <div><strong>ID Asistencial:</strong> #<span id="prof-user-id">--</span> • <strong>Arquitectura:</strong> Servidor Web Go + SQLite 3FN</div>
+          </div>
         </div>
 
         <div class="form-group">
-          <label class="form-label">Nombre del Lactante</label>
-          <input type="text" class="form-input" value="Sofía" id="prof-inp-babyname">
+          <label class="form-label" for="prof-inp-fullname">Nombre del Cuidador</label>
+          <input type="text" class="form-input" placeholder="Nombre completo" id="prof-inp-fullname">
         </div>
 
         <div class="form-group">
-          <label class="form-label">Rol del Cuidador Principal</label>
-          <select class="form-select">
+          <label class="form-label" for="prof-inp-babyname">Nombre del Lactante</label>
+          <input type="text" class="form-input" placeholder="Nombre del bebé" id="prof-inp-babyname">
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label" for="prof-inp-weight">Peso del Bebé (gramos: 1.500 - 12.000)</label>
+            <input type="number" class="form-input" placeholder="Ej. 3200" id="prof-inp-weight" min="1500" max="12000" step="10">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="prof-inp-days">Días de Vida</label>
+            <input type="number" class="form-input" placeholder="Ej. 15" id="prof-inp-days" min="0" max="1000">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="prof-inp-role">Rol del Cuidador</label>
+          <select class="form-select" id="prof-inp-role">
             <option value="Madre_Primeriza">Madre Primeriza</option>
-            <option value="Monoparental">Familia Monoparental</option>
-            <option value="Red_Apoyo">Red de Apoyo Familiar (Abuelos / Pareja)</option>
+            <option value="Monoparental">Monoparental</option>
+            <option value="Red_Apoyo">Red de Apoyo</option>
           </select>
         </div>
 
         <div class="form-group">
-          <label class="form-label">Teléfono de Emergencias Pediátricas</label>
-          <input type="text" class="form-input" value="911" id="prof-inp-phone">
+          <label class="form-label" for="prof-inp-phone">Teléfono de Emergencias Pediátricas</label>
+          <input type="text" class="form-input" placeholder="911" id="prof-inp-phone">
+        </div>
+
+        <div style="margin-top: 14px;">
+          <button class="btn-primary" onclick="UIController.saveProfileToBackend()" style="width: 100%;">
+            Guardar Cambios en Base de Datos
+          </button>
         </div>
 
         <div style="margin-top: 24px; display: flex; flex-direction: column; gap: 10px;">
@@ -528,8 +740,8 @@
             Exportar Respaldo Local (JSON)
           </button>
 
-          <button class="btn-secondary" style="color: #991B1B; border-color: #FECACA;" onclick="if(confirm('¿Restablecer datos de prueba del proyecto COIL?')) { StorageManager.resetAll(); UIController.refreshAllUI(); UIController.showToast('Datos restablecidos.'); }">
-            Restablecer Datos de Demostración COIL
+          <button class="btn-secondary" style="color: #991B1B; border-color: #FECACA;" onclick="AuthController.logout()">
+            Cerrar Sesión Actual
           </button>
         </div>
       </section>
@@ -549,18 +761,23 @@
 
       <input type="hidden" id="modal-consume-lote-id">
       
-      <p style="font-size: 13px; color: var(--neutral-600); margin-bottom: 14px;">
+      <p style="font-size: 13px; color: var(--neutral-600); margin-bottom: 12px;">
         Vas a suministrar el <strong id="modal-consume-lotename">LOTE</strong> según el orden de rotación FIFO.
       </p>
 
+      <div style="margin-bottom: 14px; padding: 10px 12px; background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 8px; font-size: 12.5px; color: #166534; display: flex; justify-content: space-between; align-items: center;">
+        <span>🌡️ ¿Deseas temperar el frasco primero?</span>
+        <button type="button" class="btn-secondary" style="font-size: 11.5px; padding: 4px 10px; background: white;" onclick="UIController.goToThawingFromModal()">Abrir Temporizador (10 min)</button>
+      </div>
+
       <div class="form-group">
         <label class="form-label">Volumen Suministrado (ml)</label>
-        <input type="number" id="modal-consume-vol" class="form-input" style="font-size: 18px; font-weight: 700;">
+        <input type="number" id="modal-consume-vol" class="form-input" style="font-size: 18px; font-weight: 700;" min="1" max="500" step="1" required>
       </div>
 
       <div class="form-group">
         <label class="form-label">Tiempo de Temperado Pasivo (minutos)</label>
-        <input type="number" id="modal-consume-time" class="form-input" value="10">
+        <input type="number" id="modal-consume-time" class="form-input" value="10" min="1" max="60">
       </div>
 
       <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
@@ -574,6 +791,44 @@
         <button class="btn-secondary" onclick="UIController.closeConsumeModal()">Cancelar</button>
         <button class="btn-primary" onclick="UIController.confirmConsumeFromModal()">Confirmar Toma Suministrada</button>
       </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       MODAL DE ASIGNACIÓN Y ETIQUETADO FÍSICO (#LOTE FIFO)
+       ========================================================================= -->
+  <div id="label-modal" class="modal-backdrop">
+    <div class="modal-dialog" style="max-width: 460px; text-align: center;">
+      <div style="font-size: 40px; margin-bottom: 6px;">🏷️</div>
+      <div style="font-size: 12px; font-weight: 700; color: #0284C7; text-transform: uppercase; letter-spacing: 0.05em;">Entrada al Banco de Leche (FIFO)</div>
+      <h3 style="font-size: 24px; font-weight: 800; color: #0F172A; margin: 4px 0 12px;">
+        <span id="label-modal-lote-id">#LOTE FIFO 01</span>
+      </h3>
+      
+      <div style="background: #F8FAFC; border: 2px dashed #0284C7; border-radius: 10px; padding: 14px 16px; margin-bottom: 14px; text-align: left;">
+        <div style="font-size: 11px; font-weight: 800; color: #0284C7; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.04em;">
+          📝 Datos para Rotular en el Frasco / Bolsa Física:
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 13px; color: #1E293B;">
+          <div><strong>Identificador:</strong> <span id="label-modal-tag" style="color: #0284C7; font-weight: 800;">LOTE #01</span></div>
+          <div><strong>Volumen:</strong> <span id="label-modal-vol" style="font-weight: 700;">60 ml</span></div>
+          <div><strong>Fecha:</strong> <span id="label-modal-date">--</span></div>
+          <div><strong>Hora:</strong> <span id="label-modal-time">--</span></div>
+        </div>
+        <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid #E2E8F0; font-size: 12.5px; color: #334155;">
+          <strong>Destino Térmico:</strong> <span id="label-modal-dest" style="font-weight: 700; color: #0F766E;">Refrigerador 4 °C</span>
+        </div>
+      </div>
+
+      <div style="background: #EFF6FF; border-left: 4px solid #3B82F6; padding: 10px 12px; text-align: left; border-radius: 6px; margin-bottom: 18px;">
+        <p style="font-size: 12px; color: #1E40AF; margin: 0; line-height: 1.4;">
+          ✓ <strong>Insertado en Cola FIFO:</strong> El frasco ha ingresado a la cola de prioridad ordenada por fecha y hora de extracción (Primero en Entrar, Primero en Salir).
+        </p>
+      </div>
+
+      <button type="button" class="btn-primary" style="width: 100%;" onclick="UIController.closeLabelModal()">
+        Entendido • Ver en Inventario FIFO
+      </button>
     </div>
   </div>
 

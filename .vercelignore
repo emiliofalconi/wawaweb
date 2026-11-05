@@ -1,0 +1,11 @@
+*.db
+*.db-shm
+*.db-wal
+WawaWeb.exe
+Dockerfile
+docker-compose.yml
+.git
+.env
+iniciar_wawaweb.bat
+test_validation.db*
+

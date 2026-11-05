@@ -18,112 +18,7 @@ const StorageManager = {
   },
 
   init() {
-    if (!localStorage.getItem(this.KEYS.USUARIO)) {
-      this.seedDefaultData();
-    }
-  },
-
-  seedDefaultData() {
-    const usuario = {
-      id_usuario: 1,
-      nombre_completo: "Ana María Rodríguez",
-      correo_electronico: "ana.rodriguez@wawaweb.org",
-      rol_cuidador: "Madre_Primeriza",
-      telefono_emergencia: "911",
-      fecha_registro: new Date().toISOString()
-    };
-
-    const lactante = {
-      id_lactante: 1,
-      id_usuario: 1,
-      nombre_bebe: "Sofía",
-      fecha_nacimiento: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
-      edad_dias: 15,
-      peso_gramos: 3200,
-      sexo: "Femenino"
-    };
-
-    // Crear lotes de extracción realistas (12h, 36h, 52h y 98h)
-    const now = Date.now();
-    const lotes = [
-      {
-        id_lote: 1,
-        id_lactante: 1,
-        fecha_hora_extraccion: new Date(now - 74 * 3600 * 1000).toISOString(),
-        volumen_ml: 50.0,
-        ubicacion_termica: "Refrigerador_4C",
-        estado_conservacion: "Caducado",
-        notas_observacion: "Extracción vespertina con sacaleches manual."
-      },
-      {
-        id_lote: 2,
-        id_lactante: 1,
-        fecha_hora_extraccion: new Date(now - 50 * 3600 * 1000).toISOString(),
-        volumen_ml: 65.0,
-        ubicacion_termica: "Refrigerador_4C",
-        estado_conservacion: "Prioritario",
-        notas_observacion: "Seno izquierdo tras toma."
-      },
-      {
-        id_lote: 3,
-        id_lactante: 1,
-        fecha_hora_extraccion: new Date(now - 28 * 3600 * 1000).toISOString(),
-        volumen_ml: 70.0,
-        ubicacion_termica: "Refrigerador_4C",
-        estado_conservacion: "Optimo",
-        notas_observacion: "Extracción matutina óptima."
-      },
-      {
-        id_lote: 4,
-        id_lactante: 1,
-        fecha_hora_extraccion: new Date(now - 14 * 3600 * 1000).toISOString(),
-        volumen_ml: 60.0,
-        ubicacion_termica: "Refrigerador_4C",
-        estado_conservacion: "Optimo",
-        notas_observacion: "Frasco hermético de vidrio estéril."
-      },
-      {
-        id_lote: 5,
-        id_lactante: 1,
-        fecha_hora_extraccion: new Date(now - 480 * 3600 * 1000).toISOString(),
-        volumen_ml: 90.0,
-        ubicacion_termica: "Congelador_18C",
-        estado_conservacion: "Optimo",
-        notas_observacion: "Bolsa térmica para congelación profunda."
-      }
-    ];
-
-    const consumos = [
-      {
-        id_consumo: 1,
-        id_lote: 99,
-        fecha_hora_consumo: new Date(now - 8 * 3600 * 1000).toISOString(),
-        volumen_ingerido_ml: 60.0,
-        temperatura_temperado_ok: true,
-        tiempo_temperado_min: 12,
-        metodo: "biberon_lote"
-      }
-    ];
-
-    const evaluaciones = [
-      {
-        id_evaluacion: 1,
-        id_lactante: 1,
-        fecha_hora_evaluacion: new Date(now - 24 * 3600 * 1000).toISOString(),
-        estado_fontanela: "Normal",
-        estado_mucosas: "Humeda",
-        signo_pliegue: "Normal_Inmediato",
-        estado_ojos: "Normales",
-        nivel_clasificacion: "Normal",
-        derivo_urgencia: false
-      }
-    ];
-
-    localStorage.setItem(this.KEYS.USUARIO, JSON.stringify(usuario));
-    localStorage.setItem(this.KEYS.LACTANTE, JSON.stringify(lactante));
-    localStorage.setItem(this.KEYS.LOTES, JSON.stringify(lotes));
-    localStorage.setItem(this.KEYS.CONSUMOS, JSON.stringify(consumos));
-    localStorage.setItem(this.KEYS.EVALUACIONES, JSON.stringify(evaluaciones));
+    // La información se carga exclusivamente desde la Base de Datos SQLite a través de la API REST.
   },
 
   get(key) {
@@ -135,9 +30,13 @@ const StorageManager = {
     localStorage.setItem(key, JSON.stringify(val));
   },
 
-  resetAll() {
-    localStorage.clear();
-    this.seedDefaultData();
+  clearAll() {
+    localStorage.removeItem(this.KEYS.USUARIO);
+    localStorage.removeItem(this.KEYS.LACTANTE);
+    localStorage.removeItem(this.KEYS.LOTES);
+    localStorage.removeItem(this.KEYS.CONSUMOS);
+    localStorage.removeItem(this.KEYS.EVALUACIONES);
+    localStorage.removeItem(this.KEYS.CONFIG);
   }
 };
 
@@ -146,6 +45,8 @@ const StorageManager = {
  */
 const FIFOEngine = {
   LIMITS: {
+    AMBIENTE_HOURS: 4,          // 4 horas máximo a temperatura ambiente (≤25 °C)
+    AMBIENTE_YELLOW_HOURS: 2,   // >2h consumo prioritario
     REFRIGERADOR_HOURS: 96,     // 4 días máximo
     REFRIGERADOR_YELLOW: 48,    // 48h a 72h prioritario
     REFRIGERADOR_RED: 72,       // >72h riesgo microbiológico
@@ -166,7 +67,37 @@ const FIFOEngine = {
     const diffHours = (now - extTime) / (3600 * 1000);
     const diffDays = diffHours / 24;
 
-    if (lote.ubicacion_termica === "Refrigerador_4C") {
+    if (lote.ubicacion_termica === "Ambiente") {
+      const remainingHours = Math.max(0, this.LIMITS.AMBIENTE_HOURS - diffHours);
+      if (diffHours < this.LIMITS.AMBIENTE_YELLOW_HOURS) {
+        return {
+          state: "green",
+          label: "Óptimo (Ambiente)",
+          hoursElapsed: Math.round(diffHours * 10) / 10,
+          remainingHours: Math.round(remainingHours * 10) / 10,
+          isExpired: false,
+          recommendation: "Conservación a temperatura ambiente segura. Administrar antes de 4 horas o refrigerar."
+        };
+      } else if (diffHours < this.LIMITS.AMBIENTE_HOURS) {
+        return {
+          state: "yellow",
+          label: "Consumo Prioritario",
+          hoursElapsed: Math.round(diffHours * 10) / 10,
+          remainingHours: Math.round(remainingHours * 10) / 10,
+          isExpired: false,
+          recommendation: "Próximo al límite de 4 horas a temperatura ambiente. Ofrecer de inmediato o refrigerar."
+        };
+      } else {
+        return {
+          state: "red",
+          label: "Caducado (Ambiente >4h)",
+          hoursElapsed: Math.round(diffHours * 10) / 10,
+          remainingHours: 0,
+          isExpired: true,
+          recommendation: "Superó las 4 horas seguras a temperatura ambiente. Descartar por seguridad bacteriológica."
+        };
+      }
+    } else if (lote.ubicacion_termica === "Refrigerador_4C") {
       const remainingHours = Math.max(0, this.LIMITS.REFRIGERADOR_HOURS - diffHours);
       if (diffHours < this.LIMITS.REFRIGERADOR_YELLOW) {
         return {
@@ -244,7 +175,7 @@ const FIFOEngine = {
 
   addBatch(batchData) {
     const lotes = StorageManager.get(StorageManager.KEYS.LOTES) || [];
-    const newId = lotes.length > 0 ? Math.max(...lotes.map(l => l.id_lote)) + 1 : 1;
+    const newId = batchData.id_lote || (lotes.length > 0 ? Math.max(...lotes.map(l => l.id_lote)) + 1 : 1);
     
     const newBatch = {
       id_lote: newId,
@@ -298,6 +229,19 @@ const FIFOEngine = {
       lote.ubicacion_termica = "Congelador_18C";
       lote.notas_observacion = (lote.notas_observacion ? lote.notas_observacion + " - " : "") + 
         `Transferido a congelador el ${new Date().toLocaleDateString('es')}`;
+      StorageManager.set(StorageManager.KEYS.LOTES, lotes);
+      return true;
+    }
+    return false;
+  },
+
+  transferToFridge(loteId) {
+    const lotes = StorageManager.get(StorageManager.KEYS.LOTES) || [];
+    const lote = lotes.find(l => l.id_lote === loteId);
+    if (lote) {
+      lote.ubicacion_termica = "Refrigerador_4C";
+      lote.notas_observacion = (lote.notas_observacion ? lote.notas_observacion + " - " : "") + 
+        `Transferido a refrigerador (4 °C) el ${new Date().toLocaleDateString('es')}`;
       StorageManager.set(StorageManager.KEYS.LOTES, lotes);
       return true;
     }
@@ -451,6 +395,462 @@ const SoundEffects = {
 };
 
 /**
+ * Cliente de Conexión a la API RESTful de WawaWeb (Backend Go + SQLite)
+ */
+const ApiClient = {
+  getToken() {
+    return localStorage.getItem('wawaweb_jwt_token') || '';
+  },
+
+  setToken(token) {
+    localStorage.setItem('wawaweb_jwt_token', token);
+  },
+
+  clearToken() {
+    localStorage.removeItem('wawaweb_jwt_token');
+  },
+
+  async request(endpoint, options = {}) {
+    const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+    const token = this.getToken();
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    try {
+      const res = await fetch(endpoint, { ...options, headers });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data.error || `Error ${res.status}: ${res.statusText}`);
+      }
+      return data;
+    } catch (err) {
+      console.warn(`[ApiClient] Aviso en petición a ${endpoint}:`, err.message);
+      throw err;
+    }
+  },
+
+  async login(email, password) {
+    return this.request('/api/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password })
+    });
+  },
+
+  async register(userData) {
+    return this.request('/api/auth/register', {
+      method: 'POST',
+      body: JSON.stringify(userData)
+    });
+  },
+
+  async getMe() {
+    return this.request('/api/auth/me');
+  },
+
+  async updateProfile(profileData) {
+    return this.request('/api/profile', {
+      method: 'PUT',
+      body: JSON.stringify(profileData)
+    });
+  },
+
+  async getBatches() {
+    return this.request('/api/batches');
+  },
+
+  async createBatch(batchData) {
+    return this.request('/api/batches', {
+      method: 'POST',
+      body: JSON.stringify(batchData)
+    });
+  },
+
+  async deleteBatch(batchId) {
+    return this.request(`/api/batches/${batchId}`, {
+      method: 'DELETE'
+    });
+  },
+
+  async getConsumptions() {
+    return this.request('/api/consumptions');
+  },
+
+  async createConsumption(consData) {
+    return this.request('/api/consumptions', {
+      method: 'POST',
+      body: JSON.stringify(consData)
+    });
+  },
+
+  async getEvaluations() {
+    return this.request('/api/evaluations');
+  },
+
+  async createEvaluation(evalData) {
+    return this.request('/api/evaluations', {
+      method: 'POST',
+      body: JSON.stringify(evalData)
+    });
+  }
+};
+
+/**
+ * Controlador de Autenticación, Sesión y Seguridad (AuthController)
+ */
+const AuthController = {
+  currentUser: null,
+  currentInfant: null,
+
+  async init() {
+    const token = ApiClient.getToken();
+    if (!token) {
+      this.showAuthScreen();
+      return;
+    }
+
+    // Verificar sesión contra el backend SQLite
+    try {
+      const res = await ApiClient.getMe();
+      await this.onLoginSuccess(res.user, res.infant, token, false);
+    } catch (err) {
+      console.warn("[AuthController] Sesión expirada o no disponible:", err.message);
+      this.showAuthScreen();
+    }
+  },
+
+  showAuthScreen() {
+    this.updateHeaderAuth(false);
+    UIController.switchScreen('screen-auth');
+    const navAuth = document.getElementById('nav-btn-auth');
+    if (navAuth) navAuth.style.display = 'block';
+    const navMain = document.getElementById('main-nav-bar');
+    if (navMain) {
+      navMain.querySelectorAll('.nav-tab-btn:not(#nav-btn-auth)').forEach(b => b.style.opacity = '0.5');
+    }
+  },
+
+  switchTab(tab) {
+    const formLogin = document.getElementById('form-login');
+    const formReg = document.getElementById('form-register');
+    const btnLogin = document.getElementById('tab-btn-login');
+    const btnReg = document.getElementById('tab-btn-register');
+    const alertBox = document.getElementById('auth-alert-box');
+    if (alertBox) alertBox.style.display = 'none';
+
+    if (tab === 'login') {
+      if (formLogin) formLogin.style.display = 'block';
+      if (formReg) formReg.style.display = 'none';
+      if (btnLogin) btnLogin.classList.add('active');
+      if (btnReg) btnReg.classList.remove('active');
+    } else {
+      if (formLogin) formLogin.style.display = 'none';
+      if (formReg) formReg.style.display = 'block';
+      if (btnLogin) btnLogin.classList.remove('active');
+      if (btnReg) btnReg.classList.add('active');
+      
+      const birthInp = document.getElementById('reg-birthdate');
+      if (birthInp) {
+        if (!birthInp.value) {
+          birthInp.value = new Date(Date.now() - 15 * 86400000).toISOString().slice(0, 10);
+        }
+        this.onBirthDateChange(birthInp.value);
+      }
+    }
+  },
+
+  onBirthDateChange(dateVal) {
+    const hint = document.getElementById('reg-calc-days-hint');
+    if (!hint) return;
+    if (!dateVal) {
+      hint.innerText = "Edad: -- días";
+      hint.style.color = "#0284C7";
+      hint.style.background = "#E0F2FE";
+      return;
+    }
+
+    const birth = new Date(dateVal + "T00:00:00");
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const diffTime = today.getTime() - birth.getTime();
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 0) {
+      hint.innerText = "⚠️ Fecha futura no permitida";
+      hint.style.color = "#DC2626";
+      hint.style.background = "#FEE2E2";
+    } else {
+      hint.innerText = `Edad calculada: ${diffDays} día${diffDays === 1 ? '' : 's'} (automático)`;
+      hint.style.color = "#0284C7";
+      hint.style.background = "#E0F2FE";
+    }
+  },
+
+  showAlert(msg, type = 'error') {
+    const box = document.getElementById('auth-alert-box');
+    if (!box) return;
+    box.className = `auth-alert ${type}`;
+    box.innerText = msg;
+    box.style.display = 'block';
+  },
+
+  async handleLogin(e) {
+    if (e) e.preventDefault();
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    const btn = document.getElementById('btn-submit-login');
+
+    try {
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = "Verificando en Base de Datos...";
+      }
+      const res = await ApiClient.login(email, password);
+      ApiClient.setToken(res.token);
+      await this.onLoginSuccess(res.user, res.infant, res.token, true);
+    } catch (err) {
+      this.showAlert(err.message || "Error al autenticar", "error");
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerText = "Acceder al Sistema Asistencial";
+      }
+    }
+  },
+
+  async loginDemo() {
+    document.getElementById('login-email').value = "demo@wawaweb.org";
+    document.getElementById('login-password').value = "wawaweb2026";
+    this.switchTab('login');
+    await this.handleLogin(null);
+  },
+
+  async handleRegister(e) {
+    if (e) e.preventDefault();
+    const btn = document.getElementById('btn-submit-reg');
+    const fullName = document.getElementById('reg-fullname').value.trim();
+    const email = document.getElementById('reg-email').value.trim();
+    const password = document.getElementById('reg-password').value;
+    const role = document.getElementById('reg-role').value;
+    const phone = document.getElementById('reg-phone').value.trim();
+    const babyName = document.getElementById('reg-babyname').value.trim();
+    const birthDate = document.getElementById('reg-birthdate').value;
+    const rawWeight = document.getElementById('reg-weight').value;
+    const weight = parseFloat(rawWeight);
+    const sex = document.getElementById('reg-sex').value;
+
+    if (!fullName || fullName.length < 3) {
+      this.showAlert("El nombre completo del cuidador debe tener al menos 3 caracteres.", "error");
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      this.showAlert("El correo electrónico no tiene un formato válido (ej. cuidador@dominio.com).", "error");
+      return;
+    }
+
+    if (!password || password.length < 6) {
+      this.showAlert("La contraseña debe tener un mínimo de 6 caracteres.", "error");
+      return;
+    }
+
+    if (!babyName || babyName.length < 2) {
+      this.showAlert("El nombre del recién nacido debe tener al menos 2 caracteres.", "error");
+      return;
+    }
+
+    if (!birthDate) {
+      this.showAlert("Por favor selecciona la fecha de nacimiento del recién nacido.", "error");
+      return;
+    }
+
+    const bDate = new Date(birthDate + "T00:00:00");
+    const today = new Date();
+    today.setHours(23, 59, 59, 999);
+    if (bDate > today) {
+      this.showAlert("La fecha de nacimiento no puede ser posterior al día de hoy.", "error");
+      return;
+    }
+
+    if (isNaN(weight) || weight <= 0) {
+      this.showAlert("El peso del bebé debe ser un número positivo mayor a 0 gramos (no se permiten números negativos).", "error");
+      return;
+    }
+
+    if (weight < 1500 || weight > 12000) {
+      this.showAlert("El peso del recién nacido debe encontrarse en el rango de 1.500 g a 12.000 g.", "error");
+      return;
+    }
+
+    const consentCheck = document.getElementById('reg-consent');
+    if (!consentCheck || !consentCheck.checked) {
+      this.showAlert("Debes aceptar el consentimiento informado para continuar con el registro asistencial.", "error");
+      return;
+    }
+
+    const birthTime = new Date(birthDate + "T00:00:00").getTime();
+    const todayTime = new Date().setHours(0, 0, 0, 0);
+    const diffDays = Math.max(0, Math.floor((todayTime - birthTime) / (1000 * 60 * 60 * 24)));
+
+    const data = {
+      full_name: fullName,
+      email: email,
+      password: password,
+      caregiver_role: role,
+      emergency_phone: phone || "911",
+      baby_name: babyName,
+      birth_date: birthDate,
+      days_old: diffDays,
+      weight_grams: weight,
+      sex: sex
+    };
+
+    try {
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = "Creando Cuenta en Base de Datos...";
+      }
+      const res = await ApiClient.register(data);
+      ApiClient.setToken(res.token);
+      await this.onLoginSuccess(res.user, res.infant, res.token, true);
+    } catch (err) {
+      this.showAlert(err.message || "Error al registrar cuenta", "error");
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerText = "Crear Cuenta y Comenzar";
+      }
+    }
+  },
+
+  async onLoginSuccess(user, infant, token, showGreeting = false) {
+    this.currentUser = user;
+    this.currentInfant = infant;
+
+    StorageManager.set(StorageManager.KEYS.USUARIO, {
+      id_usuario: user.id,
+      nombre_completo: user.full_name,
+      correo_electronico: user.email,
+      rol_cuidador: user.caregiver_role,
+      telefono_emergencia: user.emergency_phone
+    });
+
+    if (infant) {
+      StorageManager.set(StorageManager.KEYS.LACTANTE, {
+        id_lactante: infant.id,
+        id_usuario: user.id,
+        nombre_bebe: infant.baby_name,
+        fecha_nacimiento: infant.birth_date,
+        edad_dias: infant.days_old,
+        peso_gramos: infant.weight_grams,
+        sexo: infant.sex
+      });
+    }
+
+    // Sincronizar lotes de leche desde la Base de Datos SQLite
+    try {
+      const remoteBatches = await ApiClient.getBatches();
+      const localBatches = Array.isArray(remoteBatches) ? remoteBatches.map(rb => ({
+        id_lote: rb.id,
+        id_lactante: rb.infant_id,
+        fecha_hora_extraccion: rb.extraction_date,
+        volumen_ml: rb.volume_ml,
+        ubicacion_termica: rb.thermal_location,
+        estado_conservacion: rb.conservation_status,
+        notas_observacion: rb.notes
+      })) : [];
+      StorageManager.set(StorageManager.KEYS.LOTES, localBatches);
+    } catch (e) {
+      console.warn("[AuthController] Error al cargar lotes desde la base de datos:", e);
+      StorageManager.set(StorageManager.KEYS.LOTES, []);
+    }
+
+    // Sincronizar consumos y evaluaciones desde la Base de Datos SQLite
+    try {
+      const remoteCons = await ApiClient.getConsumptions();
+      StorageManager.set(StorageManager.KEYS.CONSUMOS, Array.isArray(remoteCons) ? remoteCons : []);
+    } catch (e) {
+      StorageManager.set(StorageManager.KEYS.CONSUMOS, []);
+    }
+
+    try {
+      const remoteEvals = await ApiClient.getEvaluations();
+      StorageManager.set(StorageManager.KEYS.EVALUACIONES, Array.isArray(remoteEvals) ? remoteEvals : []);
+    } catch (e) {
+      StorageManager.set(StorageManager.KEYS.EVALUACIONES, []);
+    }
+
+    this.updateHeaderAuth(true);
+    UIController.refreshAllUI();
+    UIController.switchScreen('screen-dashboard');
+
+    if (showGreeting) {
+      const shortName = user.full_name ? user.full_name.split(' ')[0] : 'Usuario';
+      UIController.showToast(`¡Bienvenida/o, ${shortName}! Datos cargados desde la Base de Datos SQLite.`);
+    }
+  },
+
+  updateHeaderAuth(isLoggedIn) {
+    const userBadge = document.getElementById('header-user-badge');
+    const userName = document.getElementById('header-user-name');
+    const userAvatar = document.getElementById('header-user-avatar');
+    const loginBtn = document.getElementById('header-btn-login');
+    const babyPill = document.getElementById('header-baby-pill');
+    const navAuth = document.getElementById('nav-btn-auth');
+    const navMain = document.getElementById('main-nav-bar');
+
+    if (isLoggedIn && this.currentUser) {
+      if (userBadge) userBadge.style.display = 'flex';
+      if (loginBtn) loginBtn.style.display = 'none';
+      if (userName) userName.innerText = this.currentUser.full_name.split(' ')[0];
+      if (userAvatar) userAvatar.innerText = this.currentUser.full_name.charAt(0).toUpperCase();
+      if (babyPill) babyPill.style.display = 'inline-flex';
+      if (navAuth) navAuth.style.display = 'none';
+      if (navMain) {
+        navMain.querySelectorAll('.nav-tab-btn').forEach(b => b.style.opacity = '1');
+      }
+
+      // Actualizar datos en pantalla de perfil
+      const profEmail = document.getElementById('prof-user-email');
+      const profId = document.getElementById('prof-user-id');
+      const profName = document.getElementById('prof-inp-fullname');
+      const profBaby = document.getElementById('prof-inp-babyname');
+      const profRole = document.getElementById('prof-inp-role');
+      const profPhone = document.getElementById('prof-inp-phone');
+      const profWeight = document.getElementById('prof-inp-weight');
+      const profDays = document.getElementById('prof-inp-days');
+
+      if (profEmail) profEmail.innerText = this.currentUser.email;
+      if (profId) profId.innerText = this.currentUser.id;
+      if (profName) profName.value = this.currentUser.full_name;
+      if (profRole) profRole.value = this.currentUser.caregiver_role;
+      if (profPhone) profPhone.value = this.currentUser.emergency_phone;
+      if (this.currentInfant) {
+        if (profBaby) profBaby.value = this.currentInfant.baby_name;
+        if (profWeight) profWeight.value = this.currentInfant.weight_grams;
+        if (profDays) profDays.value = this.currentInfant.days_old;
+      }
+    } else {
+      if (userBadge) userBadge.style.display = 'none';
+      if (loginBtn) loginBtn.style.display = 'inline-block';
+      if (babyPill) babyPill.style.display = 'none';
+    }
+  },
+
+  logout() {
+    ApiClient.clearToken();
+    StorageManager.clearAll();
+    this.currentUser = null;
+    this.currentInfant = null;
+    this.updateHeaderAuth(false);
+    UIController.refreshAllUI();
+    this.showAuthScreen();
+    UIController.showToast('Sesión cerrada correctamente.');
+  }
+};
+
+/**
  * Controlador Principal de la Interfaz de Usuario (UIController)
  */
 const UIController = {
@@ -463,8 +863,8 @@ const UIController = {
   init() {
     StorageManager.init();
     this.bindEvents();
-    this.refreshAllUI();
     this.initCalendar();
+    AuthController.init();
   },
 
   bindEvents() {
@@ -477,7 +877,10 @@ const UIController = {
 
     const inpPeso = document.getElementById('calc-inp-peso');
     const inpTomas = document.getElementById('calc-inp-tomas');
-    if (inpPeso) inpPeso.addEventListener('input', () => this.updateCalculatorView());
+    if (inpPeso) inpPeso.addEventListener('input', () => {
+      inpPeso.dataset.userModified = 'true';
+      this.updateCalculatorView();
+    });
     if (inpTomas) inpTomas.addEventListener('input', () => this.updateCalculatorView());
 
     document.querySelectorAll('.quick-vol-btn').forEach(btn => {
@@ -494,6 +897,36 @@ const UIController = {
     const inpExtVol = document.getElementById('ext-inp-vol');
     if (inpExtVol) inpExtVol.addEventListener('input', () => this.updateExtractionPreview());
 
+    // Bloquear caracteres negativos y exponenciales en todos los campos numéricos
+    document.querySelectorAll('input[type="number"]').forEach(numInput => {
+      numInput.addEventListener('keydown', (e) => {
+        if (e.key === '-' || e.key === 'e' || e.key === 'E' || e.key === '+') {
+          e.preventDefault();
+        }
+      });
+      numInput.addEventListener('input', () => {
+        if (numInput.value && parseFloat(numInput.value) < 0) {
+          numInput.value = Math.abs(parseFloat(numInput.value)) || '';
+        }
+      });
+    });
+
+    // Restringir selectores de fecha para evitar fechas futuras
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const birthInp = document.getElementById('reg-birthdate');
+    if (birthInp) {
+      birthInp.max = todayStr;
+    }
+
+    const nowIso = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    const extDateInp = document.getElementById('ext-inp-datetime');
+    if (extDateInp) {
+      extDateInp.max = nowIso;
+      if (!extDateInp.value) {
+        extDateInp.value = nowIso;
+      }
+    }
+
     document.querySelectorAll('.filter-chip-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.filter-chip-btn').forEach(b => b.classList.remove('active'));
@@ -505,6 +938,11 @@ const UIController = {
   },
 
   switchScreen(screenId) {
+    if (!ApiClient.getToken() && screenId !== 'screen-auth') {
+      this.showToast('Por favor inicia sesión para acceder al sistema asistencial.');
+      screenId = 'screen-auth';
+    }
+
     this.currentScreen = screenId;
 
     document.querySelectorAll('.nav-tab-btn').forEach(b => {
@@ -529,6 +967,17 @@ const UIController = {
     if (screenId === 'screen-inventory') this.renderInventoryList('all');
     if (screenId === 'screen-calendar') this.renderCalendarDays();
     if (screenId === 'screen-calculator') this.updateCalculatorView();
+    if (screenId === 'screen-extraction') {
+      const dtInp = document.getElementById('ext-inp-datetime');
+      if (dtInp) {
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        const nowStr = now.toISOString().slice(0, 16);
+        if (!dtInp.value) dtInp.value = nowStr;
+        dtInp.max = nowStr;
+      }
+      this.updateExtractionPreview();
+    }
   },
 
   refreshAllUI() {
@@ -541,10 +990,25 @@ const UIController = {
 
   renderHeaderMeta() {
     const lactante = StorageManager.get(StorageManager.KEYS.LACTANTE);
-    if (!lactante) return;
+    const usuario = StorageManager.get(StorageManager.KEYS.USUARIO);
 
     const elBabyName = document.querySelectorAll('.baby-display-name');
-    elBabyName.forEach(el => el.innerText = lactante.nombre_bebe);
+    elBabyName.forEach(el => el.innerText = (lactante && lactante.nombre_bebe) ? lactante.nombre_bebe : '---');
+
+    const elBabyDays = document.getElementById('header-baby-days');
+    if (elBabyDays) {
+      elBabyDays.innerText = (lactante && lactante.edad_dias !== undefined) ? `${lactante.edad_dias}` : '--';
+    }
+
+    const elDashMeta = document.getElementById('dash-baby-meta');
+    if (elDashMeta) {
+      if (lactante) {
+        const roleStr = (usuario && usuario.rol_cuidador) ? usuario.rol_cuidador.replace('_', ' ') : 'Lactancia Materna';
+        elDashMeta.innerText = `${lactante.edad_dias} días de vida • ${Number(lactante.peso_gramos).toLocaleString('es')} g • ${lactante.sexo || 'Lactante'} • ${roleStr}`;
+      } else {
+        elDashMeta.innerText = "Inicia sesión para visualizar los datos del lactante desde la base de datos.";
+      }
+    }
   },
 
   renderDashboard() {
@@ -554,11 +1018,13 @@ const UIController = {
     let totalMl = 0;
     let refriMl = 0;
     let freezerMl = 0;
+    let ambienteMl = 0;
 
     activeBatches.forEach(b => {
       totalMl += b.volumen_ml;
       if (b.ubicacion_termica === "Refrigerador_4C") refriMl += b.volumen_ml;
-      else freezerMl += b.volumen_ml;
+      else if (b.ubicacion_termica === "Congelador_18C") freezerMl += b.volumen_ml;
+      else if (b.ubicacion_termica === "Ambiente") ambienteMl += b.volumen_ml;
     });
 
     const totalOz = (totalMl / IntakeCalculator.FL_OZ_TO_ML).toFixed(1);
@@ -567,11 +1033,57 @@ const UIController = {
     const elStockOz = document.getElementById('dash-stock-oz');
     const elRefriBadge = document.getElementById('dash-refri-badge');
     const elFreezerBadge = document.getElementById('dash-freezer-badge');
+    const elAmbienteBadge = document.getElementById('dash-ambiente-badge');
 
     if (elStockMl) elStockMl.innerText = `${Math.round(totalMl)} ml`;
     if (elStockOz) elStockOz.innerText = `${totalOz} oz`;
     if (elRefriBadge) elRefriBadge.innerText = `Refri: ${Math.round(refriMl)} ml`;
     if (elFreezerBadge) elFreezerBadge.innerText = `Congelador: ${Math.round(freezerMl)} ml`;
+    if (elAmbienteBadge) {
+      if (ambienteMl > 0) {
+        elAmbienteBadge.innerText = `Ambiente: ${Math.round(ambienteMl)} ml`;
+        elAmbienteBadge.style.display = 'inline-block';
+      } else {
+        elAmbienteBadge.style.display = 'none';
+      }
+    }
+
+    // Alerta Proactiva para frascos en refrigerador con ≥ 48 horas sin usarse
+    const alertContainer = document.getElementById('dash-proactive-alert');
+    const refriBatches48h = activeBatches.filter(b => {
+      if (b.ubicacion_termica !== "Refrigerador_4C") return false;
+      const diffHours = (Date.now() - new Date(b.fecha_hora_extraccion).getTime()) / (3600 * 1000);
+      return diffHours >= 48;
+    });
+
+    if (alertContainer) {
+      if (refriBatches48h.length > 0) {
+        const urgentBatch = refriBatches48h[0];
+        const diffHours = Math.round((Date.now() - new Date(urgentBatch.fecha_hora_extraccion).getTime()) / (3600 * 1000));
+        alertContainer.innerHTML = `
+          <div style="background: #FFFBEB; border: 2px solid #F59E0B; border-radius: 12px; padding: 14px 16px; box-shadow: 0 2px 4px rgba(245, 158, 11, 0.1);">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+              <span style="font-size: 20px;">⚠️</span>
+              <strong style="font-size: 13.5px; color: #92400E; text-transform: uppercase; letter-spacing: 0.04em;">Alerta Proactiva: Frasco en Refrigerador (≥ 48 horas)</strong>
+            </div>
+            <p style="font-size: 13px; color: #78350F; margin: 0 0 10px; line-height: 1.4;">
+              El <strong>Lote #${String(urgentBatch.id_lote).padStart(2, '0')}</strong> ha cumplido <strong>${diffHours} horas</strong> en refrigerador. Para preservar al máximo sus anticuerpos sIgA y nutrientes, se sugiere <strong>consumirlo en la próxima toma</strong> o <strong>pasarlo al congelador (-18 °C)</strong> de inmediato.
+            </p>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <button class="btn-primary" style="font-size: 12px; padding: 6px 14px; background: #D97706; border-color: #D97706;" onclick="UIController.openConsumeModal(${urgentBatch.id_lote})">
+                🍼 Consumir en Próxima Toma
+              </button>
+              <button class="btn-secondary" style="font-size: 12px; padding: 6px 14px; border-color: #D97706; color: #92400E; background: white;" onclick="UIController.handleTransferToFreezer(${urgentBatch.id_lote})">
+                ❄️ Pasar al Congelador
+              </button>
+            </div>
+          </div>
+        `;
+        alertContainer.style.display = 'block';
+      } else {
+        alertContainer.style.display = 'none';
+      }
+    }
 
     const fifoContainer = document.getElementById('dash-fifo-container');
     if (!fifoContainer) return;
@@ -590,14 +1102,15 @@ const UIController = {
 
     const { lote, status } = priority;
     const isFreezer = lote.ubicacion_termica === "Congelador_18C";
-    const locText = isFreezer ? "Congelador (-18 °C)" : "Refrigerador (4 °C)";
+    const isAmbiente = lote.ubicacion_termica === "Ambiente";
+    const locText = isAmbiente ? "Ambiente (≤25 °C)" : (isFreezer ? "Congelador (-18 °C)" : "Refrigerador (4 °C)");
 
     fifoContainer.innerHTML = `
       <div class="fifo-primary-card">
-        <div class="fifo-flag">Principio FIFO (PEPS) - Lote Prioritario</div>
-        <div class="fifo-card-title">Frasco Prioritario para la Próxima Toma</div>
+        <div class="fifo-flag">Principio FIFO (PEPS) - Prioridad Biológica</div>
+        <div class="fifo-card-title">«Frasco Prioritario Hoy» (Lote #${String(lote.id_lote).padStart(2, '0')})</div>
         <div class="fifo-card-subtitle">
-          Seleccionado automáticamente por ser la extracción viable más antigua. Consumir este frasco primero previene la caducidad microbiológica en el fondo.
+          El lote más antiguo que aún está en perfecto estado y debe usarse primero. Consumir este frasco previene pérdidas y caducidades en el refrigerador o congelador.
         </div>
 
         <div class="fifo-card-meta">
@@ -615,11 +1128,19 @@ const UIController = {
 
         <div class="fifo-actions-row">
           <button class="btn-fifo-consume" onclick="UIController.openConsumeModal(${lote.id_lote})">
-            Despachar y Consumir Lote
+            🍼 Despachar y Consumir Lote
           </button>
+          <button class="btn-fifo-transfer" style="background: #0284C7; border-color: #0284C7; color: white;" onclick="UIController.goToThawingFromPriority(${lote.id_lote})">
+            🌡️ Guía y Temporizador (10 min)
+          </button>
+          ${isAmbiente ? `
+            <button class="btn-fifo-transfer" onclick="UIController.handleTransferToFridge(${lote.id_lote})" style="background: #0D9488; border-color: #0D9488; color: white;">
+              Refrigerar
+            </button>
+          ` : ''}
           ${!isFreezer ? `
             <button class="btn-fifo-transfer" onclick="UIController.handleTransferToFreezer(${lote.id_lote})">
-              Congelar
+              ❄️ Congelar
             </button>
           ` : ''}
         </div>
@@ -633,7 +1154,9 @@ const UIController = {
 
     let lotes = StorageManager.get(StorageManager.KEYS.LOTES) || [];
 
-    if (filter === 'refri') {
+    if (filter === 'ambiente') {
+      lotes = lotes.filter(l => l.ubicacion_termica === "Ambiente" && l.estado_conservacion !== "Consumido");
+    } else if (filter === 'refri') {
       lotes = lotes.filter(l => l.ubicacion_termica === "Refrigerador_4C" && l.estado_conservacion !== "Consumido");
     } else if (filter === 'freezer') {
       lotes = lotes.filter(l => l.ubicacion_termica === "Congelador_18C" && l.estado_conservacion !== "Consumido");
@@ -665,6 +1188,8 @@ const UIController = {
         month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
       });
 
+      const locName = lote.ubicacion_termica === 'Ambiente' ? 'Ambiente (≤25 °C)' : (lote.ubicacion_termica === 'Refrigerador_4C' ? 'Refrigerador (4 °C)' : 'Congelador (-18 °C)');
+
       html += `
         <div class="batch-item-card ${cardStateClass}">
           <div class="batch-card-header">
@@ -677,7 +1202,7 @@ const UIController = {
 
           <div class="batch-card-body">
             <div><strong>Volumen:</strong> ${lote.volumen_ml} ml (${(lote.volumen_ml / 29.57).toFixed(1)} oz)</div>
-            <div><strong>Ubicación:</strong> ${lote.ubicacion_termica === 'Refrigerador_4C' ? 'Refrigerador (4 °C)' : 'Congelador (-18 °C)'}</div>
+            <div><strong>Ubicación:</strong> ${locName}</div>
             <div><strong>Extraído:</strong> ${dateStr}</div>
             <div><strong>Estabilidad:</strong> ${isConsumed ? 'Histórico' : `${status.remainingHours}h de vida útil`}</div>
           </div>
@@ -693,7 +1218,12 @@ const UIController = {
               <button class="btn-card-action primary-consume" onclick="UIController.openConsumeModal(${lote.id_lote})">
                 Consumir
               </button>
-              ${lote.ubicacion_termica === 'Refrigerador_4C' ? `
+              ${lote.ubicacion_termica === 'Ambiente' ? `
+                <button class="btn-card-action" onclick="UIController.handleTransferToFridge(${lote.id_lote})">
+                  Refrigerar
+                </button>
+              ` : ''}
+              ${lote.ubicacion_termica === 'Refrigerador_4C' || lote.ubicacion_termica === 'Ambiente' ? `
                 <button class="btn-card-action" onclick="UIController.handleTransferToFreezer(${lote.id_lote})">
                   Congelar
                 </button>
@@ -720,46 +1250,187 @@ const UIController = {
     const jeringas = Math.round(vol / 10);
     const cuch = Math.round(vol / 5);
 
-    const maxTime = temp === "Refrigerador_4C" ? "Hasta 4 días (96 h a 4 °C)" : "Hasta 6 meses (-18 °C)";
+    let maxTime = "Hasta 4 días (96 h a 4 °C)";
+    if (temp === "Ambiente") {
+      maxTime = "Hasta 4 horas (Ambiente ≤25 °C)";
+    } else if (temp === "Congelador_18C") {
+      maxTime = "3 a 6 meses (-18 °C)";
+    }
+
+    const lotes = StorageManager.get(StorageManager.KEYS.LOTES) || [];
+    const nextLoteNum = lotes.length > 0 ? Math.max(...lotes.map(l => l.id_lote || 0)) + 1 : 1;
 
     previewBox.innerHTML = `
-      <strong>${vol} ml</strong> equivalen a <strong>${oz} fl oz</strong>, ${jeringas} jeringas graduadas (10 ml) o ${cuch} cucharaditas.<br>
-      Caducidad estimada: <strong>${maxTime}</strong> en zona óptima.
+      <strong>${vol} ml</strong> equivalen a <strong>${oz} fl oz</strong> (${jeringas} jeringas de 10 ml o ${cuch} cucharaditas).<br>
+      Identificador a asignar: <strong style="color: #0284C7;">#LOTE FIFO ${String(nextLoteNum).padStart(2, '0')}</strong> • Caducidad segura: <strong>${maxTime}</strong>.
     `;
   },
 
-  handleSaveExtraction(e) {
+  async handleSaveExtraction(e) {
     if (e) e.preventDefault();
-    const vol = parseFloat(document.getElementById('ext-inp-vol').value);
+    const rawVol = document.getElementById('ext-inp-vol').value;
+    const vol = parseFloat(rawVol);
     const temp = document.getElementById('ext-sel-temp').value;
     const dateVal = document.getElementById('ext-inp-datetime').value;
-    const notes = document.getElementById('ext-inp-notes').value;
+    const notes = document.getElementById('ext-inp-notes').value.trim();
 
-    if (!vol || vol <= 0) {
-      alert("Por favor introduce un volumen válido de leche extraída.");
+    if (isNaN(vol) || vol <= 0) {
+      this.showToast("El volumen debe ser un número positivo mayor a 0 ml (no se permiten números negativos ni cero).");
+      return;
+    }
+
+    if (vol < 5 || vol > 500) {
+      this.showToast("El volumen por extracción debe encontrarse en un rango de 5 ml a 500 ml.");
+      return;
+    }
+
+    let extDate = new Date().toISOString();
+    if (dateVal) {
+      const selectedTime = new Date(dateVal);
+      if (selectedTime > new Date(Date.now() + 5 * 60000)) {
+        this.showToast("La fecha y hora de extracción no puede ser futura.");
+        return;
+      }
+      extDate = selectedTime.toISOString();
+    }
+
+    // Guardar en la Base de Datos SQLite vía API
+    let createdBatch = null;
+    try {
+      createdBatch = await ApiClient.createBatch({
+        volume_ml: vol,
+        thermal_location: temp,
+        extraction_date: extDate,
+        conservation_status: "Optimo",
+        notes: notes
+      });
+    } catch (err) {
+      console.warn("[UIController] Registro local de respaldo:", err);
+      this.showToast(err.message || "Error al registrar en base de datos");
       return;
     }
 
     const newBatch = FIFOEngine.addBatch({
+      id_lote: createdBatch ? createdBatch.id : undefined,
       volumen_ml: vol,
       ubicacion_termica: temp,
-      fecha_hora_extraccion: dateVal ? new Date(dateVal).toISOString() : new Date().toISOString(),
+      fecha_hora_extraccion: extDate,
       notas_observacion: notes
     });
 
+    // Limpiar formulario para la siguiente extracción
+    const inpVol = document.getElementById('ext-inp-vol');
+    if (inpVol) inpVol.value = '';
+    const inpNotes = document.getElementById('ext-inp-notes');
+    if (inpNotes) inpNotes.value = '';
+
     SoundEffects.playChime('success');
-    this.showToast(`Lote #${String(newBatch.id_lote).padStart(2, '0')} guardado en cola FIFO.`);
+    this.showToast(`Lote #${String(newBatch.id_lote).padStart(2, '0')} guardado en Base de Datos e insertado en cola FIFO.`);
     this.refreshAllUI();
-    this.switchScreen('screen-dashboard');
+    this.openLabelModal(newBatch);
+  },
+
+  openLabelModal(batch) {
+    const modal = document.getElementById('label-modal');
+    if (!modal) return;
+    const padId = String(batch.id_lote).padStart(2, '0');
+    const dt = new Date(batch.fecha_hora_extraccion);
+    const dateFormatted = dt.toLocaleDateString('es', { day: '2-digit', month: 'short', year: 'numeric' });
+    const timeFormatted = dt.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
+
+    let destName = "Refrigerador 4 °C (hasta 4 días)";
+    if (batch.ubicacion_termica === "Ambiente") destName = "Ambiente (hasta 4 horas a ≤25 °C)";
+    else if (batch.ubicacion_termica === "Congelador_18C") destName = "Congelador -18 °C (3 a 6 meses)";
+
+    const elId = document.getElementById('label-modal-lote-id');
+    const elTag = document.getElementById('label-modal-tag');
+    const elVol = document.getElementById('label-modal-vol');
+    const elDate = document.getElementById('label-modal-date');
+    const elTime = document.getElementById('label-modal-time');
+    const elDest = document.getElementById('label-modal-dest');
+
+    if (elId) elId.innerText = `#LOTE FIFO ${padId}`;
+    if (elTag) elTag.innerText = `LOTE #${padId}`;
+    if (elVol) elVol.innerText = `${batch.volumen_ml} ml (${(batch.volumen_ml / 29.57).toFixed(1)} oz)`;
+    if (elDate) elDate.innerText = dateFormatted;
+    if (elTime) elTime.innerText = timeFormatted;
+    if (elDest) elDest.innerText = destName;
+
+    modal.classList.add('show');
+  },
+
+  closeLabelModal() {
+    const modal = document.getElementById('label-modal');
+    if (modal) modal.classList.remove('show');
+    this.refreshAllUI();
+    this.switchScreen('screen-inventory');
+  },
+
+  selectedThawingBatchId: null,
+
+  goToThawingFromPriority(loteId) {
+    this.selectedThawingBatchId = loteId;
+    this.switchScreen('screen-thawing');
+    const hint = document.getElementById('thawing-current-lot-hint');
+    if (hint) {
+      hint.innerText = `🌡️ Preparando para la toma: LOTE #${String(loteId).padStart(2, '0')}`;
+      hint.style.display = 'block';
+    }
+    const timerCard = document.querySelector('.timer-interactive-card');
+    if (timerCard) timerCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  },
+
+  goToThawingFromModal() {
+    const loteId = parseInt(document.getElementById('modal-consume-lote-id').value);
+    this.closeConsumeModal();
+    if (loteId) {
+      this.goToThawingFromPriority(loteId);
+    } else {
+      this.switchScreen('screen-thawing');
+    }
+  },
+
+  finishThawingAndConsume() {
+    const loteId = this.selectedThawingBatchId;
+    if (loteId) {
+      this.openConsumeModal(loteId);
+    } else {
+      const priority = FIFOEngine.getPriorityBatch();
+      if (priority) {
+        this.openConsumeModal(priority.lote.id_lote);
+      } else {
+        this.switchScreen('screen-dashboard');
+      }
+    }
   },
 
   updateCalculatorView() {
+    const lactante = StorageManager.get(StorageManager.KEYS.LACTANTE);
     const inpPeso = document.getElementById('calc-inp-peso');
     const inpTomas = document.getElementById('calc-inp-tomas');
+    const pesoDisplay = document.getElementById('calc-peso-display');
     if (!inpPeso || !inpTomas) return;
 
-    const pesoGramos = parseFloat(inpPeso.value) || 3200;
+    if (!inpPeso.dataset.userModified && lactante && lactante.peso_gramos) {
+      inpPeso.value = lactante.peso_gramos;
+    }
+
+    const pesoGramos = parseFloat(inpPeso.value) || (lactante ? lactante.peso_gramos : 3000);
     const tomas = parseInt(inpTomas.value) || 8;
+
+    if (pesoDisplay) {
+      pesoDisplay.innerText = `${pesoGramos.toLocaleString('es')} g (${(pesoGramos / 1000).toFixed(2)} kg)`;
+    }
+
+    const elBabyChip = document.getElementById('calc-baby-info-chip');
+    if (elBabyChip) {
+      const babyName = (lactante && lactante.nombre_bebe) ? lactante.nombre_bebe : 'Lactante';
+      const daysOld = (lactante && lactante.edad_dias !== undefined) ? `${lactante.edad_dias} días de vida` : 'Edad no registrada';
+      elBabyChip.innerHTML = `
+        <span>👶 <strong>${babyName}</strong> • ${daysOld} • Peso base: ${pesoGramos} g</span>
+        <span style="font-size: 0.76rem; color: #1E40AF; background: #DBEAFE; padding: 2px 6px; border-radius: 4px;">Fórmula: 150 ml/kg/día ÷ ${tomas} tomas</span>
+      `;
+    }
 
     const res = IntakeCalculator.calculate(pesoGramos, tomas);
 
@@ -797,15 +1468,43 @@ const UIController = {
     if (modal) modal.classList.remove('show');
   },
 
-  confirmConsumeFromModal() {
+  async confirmConsumeFromModal() {
     const loteId = parseInt(document.getElementById('modal-consume-lote-id').value);
-    const vol = parseFloat(document.getElementById('modal-consume-vol').value);
+    const rawVol = document.getElementById('modal-consume-vol').value;
+    const vol = parseFloat(rawVol);
     const tempOk = document.getElementById('modal-consume-temp-check').checked;
-    const tiempo = document.getElementById('modal-consume-time').value;
+    const tiempo = parseInt(document.getElementById('modal-consume-time').value);
 
-    if (!vol || vol <= 0) {
-      alert("Por favor indica el volumen suministrado.");
+    const lotes = StorageManager.get(StorageManager.KEYS.LOTES) || [];
+    const lote = lotes.find(l => l.id_lote === loteId);
+    if (!lote) {
+      this.showToast("Lote no encontrado.");
       return;
+    }
+
+    if (isNaN(vol) || vol <= 0) {
+      alert("El volumen a suministrar debe ser un número positivo mayor a 0 ml (no se permiten números negativos ni cero).");
+      return;
+    }
+
+    if (vol > lote.volumen_ml) {
+      alert(`El volumen ingresado (${vol} ml) supera la cantidad disponible en este frasco (${lote.volumen_ml} ml).`);
+      return;
+    }
+
+    if (isNaN(tiempo) || tiempo <= 0) {
+      alert("El tiempo de temperado pasivo debe ser un número positivo mayor a 0 minutos.");
+      return;
+    }
+
+    try {
+      await ApiClient.createConsumption({
+        batch_id: loteId,
+        volume_consumed_ml: vol,
+        method: "Biberon_Bioseguro"
+      });
+    } catch (e) {
+      console.warn("[UIController] Registro local de consumo:", e);
     }
 
     FIFOEngine.consumeBatch(loteId, vol, tempOk, tiempo, 'biberon_lote');
@@ -813,6 +1512,15 @@ const UIController = {
     SoundEffects.playChime('success');
     this.showToast(`Lote #${String(loteId).padStart(2, '0')} despachado. Stock actualizado.`);
     this.refreshAllUI();
+  },
+
+  handleTransferToFridge(loteId) {
+    if (confirm(`¿Transferir el Lote #${String(loteId).padStart(2, '0')} al refrigerador (4 °C) para prolongar su conservación hasta 4 días?`)) {
+      FIFOEngine.transferToFridge(loteId);
+      SoundEffects.playChime('success');
+      this.showToast(`Lote #${String(loteId).padStart(2, '0')} transferido al refrigerador.`);
+      this.refreshAllUI();
+    }
   },
 
   handleTransferToFreezer(loteId) {
@@ -824,9 +1532,15 @@ const UIController = {
     }
   },
 
-  handleDiscard(loteId) {
+  async handleDiscard(loteId) {
     const reason = prompt("Indica el motivo de descarte (ej. Superó 96 horas, rotura de cadena de frío):", "Superó ventana segura de conservación");
     if (reason !== null) {
+      try {
+        await ApiClient.deleteBatch(loteId);
+      } catch (e) {
+        console.warn("[UIController] Eliminado localmente:", e);
+      }
+
       FIFOEngine.discardBatch(loteId, reason);
       SoundEffects.playChime('alarm');
       this.showToast(`Lote #${String(loteId).padStart(2, '0')} descartado por bioseguridad.`);
@@ -924,15 +1638,31 @@ const UIController = {
     }
   },
 
-  saveTriageEvaluation() {
+  async saveTriageEvaluation() {
     const res = NeonatalTriage.evaluate(this.selectedTriage);
+    const fecha = new Date().toISOString();
+
+    try {
+      await ApiClient.createEvaluation({
+        evaluation_date: fecha,
+        fontanelle_status: this.selectedTriage.fontanela,
+        oral_mucosa_status: this.selectedTriage.mucosas,
+        skin_pinch_status: this.selectedTriage.pliegue,
+        sunken_eyes_status: this.selectedTriage.ojos,
+        triage_level: res.level,
+        action_taken: res.actionRequired || "Monitoreo domiciliario"
+      });
+    } catch (e) {
+      console.warn("[UIController] Triaje guardado localmente de respaldo:", e);
+    }
+
     const evaluaciones = StorageManager.get(StorageManager.KEYS.EVALUACIONES) || [];
     const newId = evaluaciones.length > 0 ? Math.max(...evaluaciones.map(e => e.id_evaluacion)) + 1 : 1;
 
     evaluaciones.push({
       id_evaluacion: newId,
       id_lactante: 1,
-      fecha_hora_evaluacion: new Date().toISOString(),
+      fecha_hora_evaluacion: fecha,
       estado_fontanela: this.selectedTriage.fontanela,
       estado_mucosas: this.selectedTriage.mucosas,
       signo_pliegue: this.selectedTriage.pliegue,
@@ -943,7 +1673,82 @@ const UIController = {
 
     StorageManager.set(StorageManager.KEYS.EVALUACIONES, evaluaciones);
     SoundEffects.playChime('success');
-    this.showToast("Evaluación clínica guardada en el historial del lactante.");
+    this.showToast("Evaluación clínica guardada en la Base de Datos SQLite y en el historial.");
+  },
+
+  async saveProfileToBackend() {
+    const fullName = document.getElementById('prof-inp-fullname')?.value.trim();
+    const babyName = document.getElementById('prof-inp-babyname')?.value.trim();
+    const role = document.getElementById('prof-inp-role')?.value;
+    const phone = document.getElementById('prof-inp-phone')?.value.trim();
+    const rawWeight = document.getElementById('prof-inp-weight')?.value;
+    const rawDays = document.getElementById('prof-inp-days')?.value;
+    const weight = parseFloat(rawWeight);
+    const days = parseInt(rawDays);
+
+    if (!fullName || fullName.length < 3) {
+      this.showToast("El nombre del cuidador debe tener al menos 3 caracteres.");
+      return;
+    }
+    if (!babyName || babyName.length < 2) {
+      this.showToast("El nombre del lactante debe tener al menos 2 caracteres.");
+      return;
+    }
+    if (isNaN(weight) || weight <= 0) {
+      this.showToast("El peso del bebé debe ser un número positivo mayor a 0 gramos (no se permiten números negativos).");
+      return;
+    }
+    if (weight < 1500 || weight > 12000) {
+      this.showToast("El peso del lactante debe encontrarse en el rango asistencial de 1.500 g a 12.000 g.");
+      return;
+    }
+    if (isNaN(days) || days < 0) {
+      this.showToast("Los días de vida no pueden ser un valor negativo.");
+      return;
+    }
+
+    try {
+      await ApiClient.updateProfile({
+        full_name: fullName,
+        caregiver_role: role,
+        emergency_phone: phone,
+        baby_name: babyName,
+        birth_date: new Date().toISOString().slice(0, 10),
+        days_old: days,
+        weight_grams: weight,
+        sex: "Femenino"
+      });
+
+      const user = StorageManager.get(StorageManager.KEYS.USUARIO) || {};
+      user.nombre_completo = fullName;
+      user.rol_cuidador = role;
+      user.telefono_emergencia = phone;
+      StorageManager.set(StorageManager.KEYS.USUARIO, user);
+
+      const infant = StorageManager.get(StorageManager.KEYS.LACTANTE) || {};
+      infant.nombre_bebe = babyName;
+      infant.peso_gramos = weight;
+      infant.edad_dias = days;
+      StorageManager.set(StorageManager.KEYS.LACTANTE, infant);
+
+      if (AuthController.currentUser) {
+        AuthController.currentUser.full_name = fullName;
+        AuthController.currentUser.caregiver_role = role;
+        AuthController.currentUser.emergency_phone = phone;
+      }
+      if (AuthController.currentInfant) {
+        AuthController.currentInfant.baby_name = babyName;
+        AuthController.currentInfant.weight_grams = weight;
+        AuthController.currentInfant.days_old = days;
+      }
+
+      AuthController.updateHeaderAuth(true);
+      this.refreshAllUI();
+      SoundEffects.playChime('success');
+      this.showToast('Datos actualizados en la Base de Datos SQLite correctamente.');
+    } catch (err) {
+      this.showToast(`Error al guardar en base de datos: ${err.message}`);
+    }
   },
 
   initCalendar() {
@@ -1036,7 +1841,7 @@ const UIController = {
         <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: white; border: 1px solid var(--neutral-200); border-radius: var(--radius-sm); margin-bottom: 6px;">
           <div>
             <strong>LOTE #${String(l.id_lote).padStart(2, '0')}</strong> (${l.volumen_ml} ml)
-            <div style="font-size: 11px; color: var(--neutral-500);">${l.ubicacion_termica === 'Refrigerador_4C' ? 'Refrigerador (4 °C)' : 'Congelador (-18 °C)'}</div>
+            <div style="font-size: 11px; color: var(--neutral-500);">${l.ubicacion_termica === 'Ambiente' ? 'Ambiente (≤25 °C)' : (l.ubicacion_termica === 'Refrigerador_4C' ? 'Refrigerador (4 °C)' : 'Congelador (-18 °C)')}</div>
           </div>
           <span class="batch-status-badge badge-${st.state}">${st.label}</span>
         </div>

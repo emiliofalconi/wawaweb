@@ -56,43 +56,80 @@ WawaWeb es una aplicacion web interactiva de salud digital concebida para brinda
 
 ```text
 wawaweb/
+├── backend/                     # Capa de backend y persistencia relacional (Go)
+│   ├── auth.go                  # Autenticación JWT, hash bcrypt y middleware de seguridad
+│   ├── db.go                    # Conexión SQLite (WAL, Foreign Keys, 3FN) y migraciones
+│   ├── handlers.go              # Controladores RESTful (Auth, Lotes, Consumos, Triaje)
+│   └── models.go                # Entidades del dominio clínico y DTOs
+├── wawaweb-app/                 # Distribución frontend embebida en el ejecutable
+├── Dockerfile                   # Imagen multi-stage optimizada para la nube (Alpine)
+├── docker-compose.yml           # Orquestación de contenedores y volúmenes persistentes
+├── .env.example                 # Plantilla de variables de entorno de producción
 ├── index.html                   # Interfaz de usuario Single Page Application (SPA)
-├── app.js                       # Motores logicos: FIFO, Calculadora, Triaje y Persistencia
+├── app.js                       # Clientes REST (ApiClient), AuthController y motores FIFO
 ├── styles.css                   # Hoja de estilos responsiva (Mobile-First)
-├── manifest.json                # Configuracion PWA para dispositivos moviles
-├── main.go                      # Servidor nativo ligero con assets embebidos (Go)
-├── iniciar_wawaweb.bat          # Script de ejecucion inmediata en Windows
-├── docs/                        # Documentacion academica formal y reportes
-│   ├── WawaWeb_octubre2026.pdf  # Informe de Analisis de Proyecto (Normas APA)
-│   ├── WawaWeb_octubre2026.docx # Version editable del informe academico
-│   ├── Plan_de_Sprints_WawaWeb_UCAB_Venezuela.docx # Cronograma detallado de Sprints
-│   └── build_complete_wawaweb_system.py # Generador automatizado de la documentacion
-└── README.md                    # Documentacion general del repositorio
+├── manifest.json                # Configuración PWA para dispositivos móviles
+├── main.go                      # Servidor nativo concurrente con soporte web y desktop (Go)
+├── iniciar_wawaweb.bat          # Script de ejecución inmediata en Windows
+├── docs/                        # Documentación académica formal y reportes
+└── README.md                    # Documentación general del repositorio
 ```
 
 ---
 
-## 4. Instrucciones de Ejecucion Local
+## 4. Instrucciones de Ejecución y Despliegue en la Web
 
-### Opcion A: Ejecucion Directa en Navegador (Sin dependencias)
-1. Clona el repositorio:
+### Opción A: Despliegue en la Web con Docker (Recomendado para Producción)
+Compatible con **Render**, **Railway**, **Fly.io**, **Google Cloud Run** y **AWS**:
+
+1. Compila y levanta con Docker Compose:
    ```bash
-   git clone https://github.com/emiliofalconi/wawaweb.git
-   cd wawaweb
+   docker compose up -d --build
    ```
-2. Abre el archivo `index.html` en Google Chrome, Mozilla Firefox, Microsoft Edge o Safari:
-   * En Windows: Haz doble clic sobre `iniciar_wawaweb.bat` o sobre `index.html`.
+2. La plataforma estará disponible en `http://localhost:8080/` con persistencia en el volumen montado.
 
-### Opcion B: Servidor Nativo en Go
-Si cuentas con Go instalado en tu sistema:
+### Opción B: Servidor Nativo en Go con Base de Datos SQLite
 ```bash
-go run main.go
+go run .
 ```
-El servidor se iniciara en un puerto local disponible y abrira de forma automatica la aplicacion en tu navegador.
+O compila el binario ejecutable de producción:
+```bash
+go build -o WawaWeb.exe .
+./WawaWeb.exe
+```
+
+### Opción C: Despliegue en Vercel (Serverless Cloud PaaS)
+El proyecto incluye soporte nativo para **Vercel** mediante Serverless Functions en Go y entrega estática de ultra baja latencia:
+1. Sube tu repositorio a GitHub.
+2. Inicia sesión en [Vercel](https://vercel.com) y selecciona **Add New Project** > **Import Git Repository**.
+3. Vercel detectará automáticamente [`vercel.json`](vercel.json) y compilará la API en [`api/index.go`](api/index.go).
+4. Haz clic en **Deploy** y obtendrás tu URL pública HTTPS (ej. `wawaweb.vercel.app`).
+
+### Opción D: Ejecución Directa en Navegador (Modo Demo Local)
+Haz doble clic sobre `iniciar_wawaweb.bat` o abre `index.html` directamente en tu navegador.
 
 ---
 
-## 5. Cronograma de Sprints (Tercer Parcial)
+## 5. Módulo de Autenticación y Base de Datos Relacional (3FN)
+
+El sistema cuenta con autenticación segura y persistencia en base de datos:
+* **Credenciales Demo de Acceso Rápido:**
+  * **Correo:** `demo@wawaweb.org`
+  * **Contraseña:** `wawaweb2026`
+* **Modelo Relacional en Tercera Forma Normal (3FN):**
+  * `users`: Identidad del cuidador, hash de contraseñas (`bcrypt`), rol asistencial y teléfono de emergencia.
+  * `infants`: Ficha clínica del lactante vinculada al usuario (nombre, edad en días, peso en gramos, sexo).
+  * `milk_batches`: Banco de leche con trazabilidad por estampa cronológica, volumen y ubicación térmica.
+  * `milk_consumptions`: Registro de suministros y tomas para cálculo de adherencia.
+  * `clinical_evaluations`: Historial de tamizaje de alarma neonatal (fontanela, pliegue, mucosas, ojos).
+* **Seguridad y Escalabilidad:**
+  * Tokens firmados con **JWT (HS256)** con expiración configurable.
+  * Conexiones con modo `WAL` (*Write-Ahead Logging*) y claves foráneas activas.
+  * Puerto configurable vía variable de entorno `$PORT` para compatibilidad nativa con PaaS en la nube.
+
+---
+
+## 6. Cronograma de Sprints (Tercer Parcial)
 * **Fecha Limite de Entrega Definitiva:** 16 de Noviembre de 2026
 * **Sprint 1 & 2:** Levantamiento clinico, modelo MER 3FN y diseno asistencial en Miro (Terminado).
 * **Sprint 3:** Algoritmo FIFO de lotes y matriz de calendario semaforico (Terminado).

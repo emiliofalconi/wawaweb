@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  wawaweb:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: wawaweb_app
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - HOST=0.0.0.0
+      - DATABASE_PATH=/app/data/wawaweb.db
+      - JWT_SECRET=super-secure-production-secret-coil-202715
+      - NO_BROWSER=1
+    volumes:
+      - wawaweb_data:/app/data
+
+volumes:
+  wawaweb_data:
+    driver: local
+

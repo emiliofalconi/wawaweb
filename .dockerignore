@@ -1,0 +1,9 @@
+.git
+.github
+*.exe
+docs/
+*.bat
+wawaweb.db*
+.system_generated/
+scratch/
+
