@@ -231,7 +231,7 @@
 
         <!-- Stock Disponible (ml y oz) -->
         <div class="stock-grid">
-          <div class="stock-stat-box">
+          <div class="stock-stat-box" onclick="UIController.switchScreen('screen-inventory')" style="cursor: pointer;" title="Ver inventario">
             <div class="stat-value" id="dash-stock-ml">0 ml</div>
             <div class="stat-label">Stock Total Disponible</div>
             <div style="display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap;">
@@ -239,7 +239,7 @@
               <span class="stat-badge" id="dash-ambiente-badge" style="display: none; background: #FEF3C7; color: #92400E; border: 1px solid #FCD34D;">Ambiente: 0 ml</span>
             </div>
           </div>
-          <div class="stock-stat-box">
+          <div class="stock-stat-box" onclick="UIController.switchScreen('screen-inventory')" style="cursor: pointer;" title="Ver inventario">
             <div class="stat-value" id="dash-stock-oz">0.0 oz</div>
             <div class="stat-label">Equivalente en Onzas</div>
             <span class="stat-badge badge-congelado" id="dash-freezer-badge">Congelador: 0 ml</span>
@@ -254,31 +254,122 @@
           <!-- Generado dinámicamente por FIFOEngine -->
         </div>
 
-        <!-- Grilla de Accesos Rápidos -->
-        <div class="quick-tiles-grid">
-          <div class="action-tile-btn" onclick="UIController.switchScreen('screen-extraction')">
-            <span class="tile-title">Nueva Extracción</span>
-            <span class="tile-desc">Registrar volumen (ml/oz) y fecha</span>
+        <!-- Mosaico Minimalista de Módulos (Grid Hub) -->
+        <div class="mosaic-section-header">
+          <span class="mosaic-section-title">Módulos del Sistema</span>
+        </div>
+
+        <div class="mosaic-grid">
+          <div class="mosaic-tile-card" onclick="UIController.switchScreen('screen-extraction')">
+            <div class="tile-icon-bubble">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 5v14M5 12h14"></path>
+              </svg>
+            </div>
+            <div class="tile-content">
+              <div class="tile-title">Nueva Extracción</div>
+              <div class="tile-desc">Registrar volumen (ml/oz), fecha y frío</div>
+            </div>
           </div>
-          <div class="action-tile-btn" onclick="UIController.switchScreen('screen-inventory')">
-            <span class="tile-title">Ver Inventario FIFO</span>
-            <span class="tile-desc">Control de rotación y lotes</span>
+
+          <div class="mosaic-tile-card" onclick="UIController.switchScreen('screen-inventory')">
+            <div class="tile-icon-bubble">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="3" y1="9" x2="21" y2="9"></line>
+                <line x1="9" y1="21" x2="9" y2="9"></line>
+              </svg>
+            </div>
+            <div class="tile-content">
+              <div class="tile-title">Banco de Leche (FIFO)</div>
+              <div class="tile-desc">Control de rotación cronológica de frascos</div>
+            </div>
           </div>
-          <div class="action-tile-btn" onclick="UIController.switchScreen('screen-calculator')">
-            <span class="tile-title">Calculadora Pediátrica</span>
-            <span class="tile-desc">Dosis según peso y tomas</span>
+
+          <div class="mosaic-tile-card" onclick="UIController.switchScreen('screen-intake-history')">
+            <div class="tile-icon-bubble">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+              </svg>
+            </div>
+            <div class="tile-content">
+              <div class="tile-title">Historial de Tomas</div>
+              <div class="tile-desc">Registro de dosis, horarios y métodos</div>
+            </div>
           </div>
-          <div class="action-tile-btn" onclick="UIController.switchScreen('screen-calendar')">
-            <span class="tile-title">Semáforo de Frescura</span>
-            <span class="tile-desc">Vigilancia de estabilidad térmica</span>
+
+          <div class="mosaic-tile-card" onclick="UIController.switchScreen('screen-calculator')">
+            <div class="tile-icon-bubble">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="4" y="2" width="16" height="20" rx="2"></rect>
+                <line x1="8" y1="6" x2="16" y2="6"></line>
+                <line x1="8" y1="10" x2="16" y2="10"></line>
+                <line x1="8" y1="14" x2="12" y2="14"></line>
+                <line x1="8" y1="18" x2="10" y2="18"></line>
+              </svg>
+            </div>
+            <div class="tile-content">
+              <div class="tile-title">Calculadora Pediátrica</div>
+              <div class="tile-desc">Dosis según peso (150 ml/kg/día)</div>
+            </div>
           </div>
-          <div class="action-tile-btn" onclick="UIController.switchScreen('screen-thawing')">
-            <span class="tile-title">Baño María Seguro</span>
-            <span class="tile-desc">Temporizador clínico de 10 min</span>
+
+          <div class="mosaic-tile-card" onclick="UIController.switchScreen('screen-calendar')">
+            <div class="tile-icon-bubble">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+              </svg>
+            </div>
+            <div class="tile-content">
+              <div class="tile-title">Calendario Semafórico</div>
+              <div class="tile-desc">Estabilidad térmica en refrigerador y congelador</div>
+            </div>
           </div>
-          <div class="action-tile-btn" onclick="UIController.switchScreen('screen-triage')" style="border-color: #FECDD3; background: #FFF5F6;">
-            <span class="tile-title" style="color: #BE123C;">Alerta Neonatal</span>
-            <span class="tile-desc">Tamizaje de signos de deshidratación</span>
+
+          <div class="mosaic-tile-card" onclick="UIController.switchScreen('screen-thawing')">
+            <div class="tile-icon-bubble">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+            </div>
+            <div class="tile-content">
+              <div class="tile-title">Temperado Seguro</div>
+              <div class="tile-desc">Protocolo baño maría tibio y timer de 10 min</div>
+            </div>
+          </div>
+
+          <div class="mosaic-tile-card" onclick="UIController.switchScreen('screen-triage')">
+            <div class="tile-icon-bubble" style="color: var(--sem-red);">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
+            </div>
+            <div class="tile-content">
+              <div class="tile-title">Alerta Neonatal</div>
+              <div class="tile-desc">Triaje AIEPI de 4 signos de deshidratación</div>
+            </div>
+          </div>
+
+          <div class="mosaic-tile-card" onclick="UIController.switchScreen('screen-profile')">
+            <div class="tile-icon-bubble">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+            </div>
+            <div class="tile-content">
+              <div class="tile-title">Perfil y Reportes</div>
+              <div class="tile-desc">Datos del bebé, exportar JSON e imprimir informe</div>
+            </div>
           </div>
         </div>
       </section>
@@ -287,7 +378,14 @@
            PANTALLA 2: GESTIÓN DE BANCO DE LECHE (INVENTARIO FIFO COMPLETO)
            --------------------------------------------------------------------- -->
       <section id="screen-inventory" class="app-screen">
-        <div class="hero-header" style="background: linear-gradient(135deg, #1E3A8A 0%, #0D9488 100%);">
+        <button class="btn-back-hub" onclick="UIController.switchScreen('screen-dashboard')">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+          <span>Volver al Menú Principal</span>
+        </button>
+        <div class="hero-header">
           <span class="hero-tag">Trazabilidad de Cadena de Frío</span>
           <h2 class="hero-title">Inventario FIFO de Extracciones</h2>
           <p class="hero-desc">Lotes ordenados por antigüedad biológica (Primero en Entrar, Primero en Salir).</p>
@@ -315,10 +413,46 @@
       </section>
 
       <!-- ---------------------------------------------------------------------
+           PANTALLA: HISTORIAL DE TOMAS SUMINISTRADAS
+           --------------------------------------------------------------------- -->
+      <section id="screen-intake-history" class="app-screen">
+        <button class="btn-back-hub" onclick="UIController.switchScreen('screen-dashboard')">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+          <span>Volver al Menú Principal</span>
+        </button>
+        <div class="hero-header">
+          <span class="hero-tag">Seguimiento Nutricional y Clínico</span>
+          <h2 class="hero-title">Historial de Tomas Ingeridas</h2>
+          <p class="hero-desc">Registro detallado de tomas administradas, volúmenes, métodos y temperado pasivo.</p>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <span style="font-size: 13px; font-weight: 700; color: var(--neutral-700);">Tomas Registradas</span>
+          <button class="btn-secondary" style="padding: 6px 12px; font-size: 12px;" onclick="UIController.openDirectIntakeModal()">
+            + Registrar Toma
+          </button>
+        </div>
+
+        <div id="intake-history-list-container">
+          <!-- Inyectado dinámicamente por UIController.renderIntakeHistory -->
+        </div>
+      </section>
+
+      <!-- ---------------------------------------------------------------------
            PANTALLA 3: CAPTURA DE NUEVA EXTRACCIÓN (FORMULARIO FIFO)
            --------------------------------------------------------------------- -->
       <section id="screen-extraction" class="app-screen">
-        <div class="hero-header" style="background: linear-gradient(135deg, #0D9488 0%, #047857 100%);">
+        <button class="btn-back-hub" onclick="UIController.switchScreen('screen-dashboard')">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+          <span>Volver al Menú Principal</span>
+        </button>
+        <div class="hero-header">
           <span class="hero-tag">Registro de Extracción Biosegura</span>
           <h2 class="hero-title">Ingreso de Nuevo Lote</h2>
           <p class="hero-desc">El lote ingresará automáticamente al final de la cola FIFO para control de caducidad.</p>
@@ -378,7 +512,14 @@
            PANTALLA 4: CALCULADORA VOLUMÉTRICA Y CONVERSOR PRÁCTICO
            --------------------------------------------------------------------- -->
       <section id="screen-calculator" class="app-screen">
-        <div class="hero-header" style="background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);">
+        <button class="btn-back-hub" onclick="UIController.switchScreen('screen-dashboard')">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+          <span>Volver al Menú Principal</span>
+        </button>
+        <div class="hero-header">
           <span class="hero-tag">Dosificación Pediátrica</span>
           <h2 class="hero-title">Calculadora y Conversor Doméstico</h2>
           <p class="hero-desc">Basado en la regla biomédica internacional de 150 ml/kg/día para lactantes sanos.</p>
@@ -445,7 +586,14 @@
            PANTALLA 5: CALENDARIO SEMAFÓRICO DE FRESCURA
            --------------------------------------------------------------------- -->
       <section id="screen-calendar" class="app-screen">
-        <div class="hero-header" style="background: linear-gradient(135deg, #0F766E 0%, #115E59 100%);">
+        <button class="btn-back-hub" onclick="UIController.switchScreen('screen-dashboard')">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+          <span>Volver al Menú Principal</span>
+        </button>
+        <div class="hero-header">
           <span class="hero-tag">Vigilancia Semafórica</span>
           <h2 class="hero-title">Calendario de Frescura</h2>
           <p class="hero-desc">Monitoreo cromático del banco de leche según las ventanas de estabilidad térmica.</p>
@@ -488,7 +636,14 @@
            PANTALLA 6: GUÍA DE TEMPERADO BIOSEGURO Y TEMPORIZADOR
            --------------------------------------------------------------------- -->
       <section id="screen-thawing" class="app-screen">
-        <div class="hero-header" style="background: linear-gradient(135deg, #0284C7 0%, #0369A1 100%);">
+        <button class="btn-back-hub" onclick="UIController.switchScreen('screen-dashboard')">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+          <span>Volver al Menú Principal</span>
+        </button>
+        <div class="hero-header">
           <span class="hero-tag">Protocolo de Bioseguridad</span>
           <h2 class="hero-title">Temperado y Descongelación</h2>
           <p class="hero-desc">Directrices hospitalarias de la OMS y el MSP para proteger las inmunoglobulinas.</p>
@@ -555,7 +710,14 @@
            PANTALLA 7: EVALUADOR VISUAL DE ALARMA NEONATAL (TRIAJE CLÍNICO)
            --------------------------------------------------------------------- -->
       <section id="screen-triage" class="app-screen">
-        <div class="hero-header" style="background: linear-gradient(135deg, #BE123C 0%, #881337 100%);">
+        <button class="btn-back-hub" onclick="UIController.switchScreen('screen-dashboard')">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+          <span>Volver al Menú Principal</span>
+        </button>
+        <div class="hero-header">
           <span class="hero-tag">Tamizaje Clínico AIEPI / OMS</span>
           <h2 class="hero-title">Evaluador de Alarma Neonatal</h2>
           <p class="hero-desc">Detección oportuna de deshidratación aguda y desnutrición en lactantes de 0 a 6 meses.</p>
@@ -731,12 +893,22 @@
           </button>
         </div>
 
-        <div style="margin-top: 24px; display: flex; flex-direction: column; gap: 10px;">
+        <div style="margin-top: 18px; margin-bottom: 24px;">
+          <button class="btn-primary" onclick="UIController.saveProfileSettings()">
+            Guardar y Actualizar Perfil Clínico
+          </button>
+        </div>
+
+        <hr style="border: none; border-top: 1px solid var(--neutral-200); margin: 24px 0;">
+
+        <h3 style="font-size: 14px; font-weight: 700; color: var(--neutral-800); margin-bottom: 12px;">Reportes y Respaldo de Datos</h3>
+
+        <div style="display: flex; flex-direction: column; gap: 10px;">
           <button class="btn-primary" onclick="UIController.generateClinicalPrintReport()">
             Generar e Imprimir Reporte para el Pediatra
           </button>
 
-          <button class="btn-secondary" onclick="UIController.showToast('Datos exportados en JSON correctamente.');">
+          <button class="btn-secondary" onclick="UIController.exportDataJSON()">
             Exportar Respaldo Local (JSON)
           </button>
 
@@ -773,6 +945,16 @@
       <div class="form-group">
         <label class="form-label">Volumen Suministrado (ml)</label>
         <input type="number" id="modal-consume-vol" class="form-input" style="font-size: 18px; font-weight: 700;" min="1" max="500" step="1" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Método de Suministro</label>
+        <select id="modal-consume-method" class="form-select">
+          <option value="biberon_lote">Biberón Graduado</option>
+          <option value="vasito_reliquia">Vasito / Cucharita (Evita confusión tetina)</option>
+          <option value="jeringa_10ml">Jeringa Dosificadora (10 ml)</option>
+          <option value="suplementador">Suplementador al Pecho (SNS)</option>
+        </select>
       </div>
 
       <div class="form-group">

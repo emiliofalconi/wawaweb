@@ -862,9 +862,40 @@ const UIController = {
 
   init() {
     StorageManager.init();
+    this.initTheme();
     this.bindEvents();
     this.initCalendar();
     AuthController.init();
+  },
+
+  initTheme() {
+    const savedTheme = localStorage.getItem('wawaweb_theme') || 
+      (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    this.applyTheme(savedTheme);
+  },
+
+  toggleDarkMode() {
+    const current = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+    const next = current === 'dark' ? 'light' : 'dark';
+    this.applyTheme(next);
+    localStorage.setItem('wawaweb_theme', next);
+    this.showToast(next === 'dark' ? 'Modo noche activado' : 'Modo cálido activado');
+  },
+
+  applyTheme(theme) {
+    if (theme === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      const iconMoon = document.getElementById('theme-icon-moon');
+      const iconSun = document.getElementById('theme-icon-sun');
+      if (iconMoon) iconMoon.style.display = 'none';
+      if (iconSun) iconSun.style.display = 'block';
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+      const iconMoon = document.getElementById('theme-icon-moon');
+      const iconSun = document.getElementById('theme-icon-sun');
+      if (iconMoon) iconMoon.style.display = 'block';
+      if (iconSun) iconSun.style.display = 'none';
+    }
   },
 
   bindEvents() {
@@ -965,6 +996,7 @@ const UIController = {
 
     if (screenId === 'screen-dashboard') this.renderDashboard();
     if (screenId === 'screen-inventory') this.renderInventoryList('all');
+    if (screenId === 'screen-intake-history') this.renderIntakeHistory();
     if (screenId === 'screen-calendar') this.renderCalendarDays();
     if (screenId === 'screen-calculator') this.updateCalculatorView();
     if (screenId === 'screen-extraction') {
@@ -984,13 +1016,23 @@ const UIController = {
     this.renderHeaderMeta();
     this.renderDashboard();
     this.renderInventoryList('all');
+    this.renderIntakeHistory();
     this.updateCalculatorView();
     this.updateExtractionPreview();
+    this.renderProfileForm();
   },
 
   renderHeaderMeta() {
     const lactante = StorageManager.get(StorageManager.KEYS.LACTANTE);
     const usuario = StorageManager.get(StorageManager.KEYS.USUARIO);
+
+    // Calcular días de vida basados en la fecha de nacimiento si está disponible
+    let diasVida = lactante.edad_dias || 15;
+    if (lactante.fecha_nacimiento) {
+      const birth = new Date(lactante.fecha_nacimiento).getTime();
+      const diffDays = Math.floor((Date.now() - birth) / (24 * 3600 * 1000));
+      if (!isNaN(diffDays) && diffDays >= 0) diasVida = diffDays;
+    }
 
     const elBabyName = document.querySelectorAll('.baby-display-name');
     elBabyName.forEach(el => el.innerText = (lactante && lactante.nombre_bebe) ? lactante.nombre_bebe : '---');
@@ -1463,6 +1505,21 @@ const UIController = {
     modal.classList.add('show');
   },
 
+  openDirectIntakeModal() {
+    const priority = FIFOEngine.getPriorityBatch();
+    if (priority) {
+      this.openConsumeModal(priority.lote.id_lote);
+    } else {
+      const activeBatches = FIFOEngine.getActiveBatches();
+      if (activeBatches.length > 0) {
+        this.openConsumeModal(activeBatches[0].id_lote);
+      } else {
+        alert("No hay lotes de leche materna disponibles en el inventario. Registra una nueva extracción primero.");
+        this.switchScreen('screen-extraction');
+      }
+    }
+  },
+
   closeConsumeModal() {
     const modal = document.getElementById('consume-modal');
     if (modal) modal.classList.remove('show');
@@ -1510,7 +1567,7 @@ const UIController = {
     FIFOEngine.consumeBatch(loteId, vol, tempOk, tiempo, 'biberon_lote');
     this.closeConsumeModal();
     SoundEffects.playChime('success');
-    this.showToast(`Lote #${String(loteId).padStart(2, '0')} despachado. Stock actualizado.`);
+    this.showToast(`Lote #${String(loteId).padStart(2, '0')} despachado (${vol} ml). Historial actualizado.`);
     this.refreshAllUI();
   },
 
@@ -1856,10 +1913,158 @@ const UIController = {
     `;
   },
 
+  renderIntakeHistory() {
+    const container = document.getElementById('intake-history-list-container');
+    if (!container) return;
+
+    const consumos = StorageManager.get(StorageManager.KEYS.CONSUMOS) || [];
+    if (consumos.length === 0) {
+      container.innerHTML = `
+        <div style="text-align: center; padding: 40px 20px; color: var(--neutral-500);">
+          <div style="font-size: 15px; font-weight: 700;">No hay tomas registradas</div>
+          <p style="font-size: 12.5px; margin-top: 4px;">Usa el botón "Registrar Toma" para añadir una administración de leche.</p>
+        </div>
+      `;
+      return;
+    }
+
+    const methodLabels = {
+      biberon_lote: "Biberón graduado",
+      vasito_reliquia: "Vasito / Cuchara",
+      jeringa_10ml: "Jeringa (10 ml)",
+      suplementador: "Suplementador (SNS)"
+    };
+
+    // Orden cronológico inverso (más recientes primero)
+    const sorted = [...consumos].sort((a, b) => new Date(b.fecha_hora_consumo) - new Date(a.fecha_hora_consumo));
+
+    let rowsHtml = sorted.map(c => {
+      const fecha = new Date(c.fecha_hora_consumo).toLocaleString('es', {
+        month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+      });
+      const metodo = methodLabels[c.metodo] || c.metodo || 'Biberón';
+      const tempCheck = c.temperatura_temperado_ok ? '✅ Dorso muñeca' : '⚠️ No verificada';
+      return `
+        <tr>
+          <td><strong>${fecha}</strong></td>
+          <td>${c.id_lote ? `Lote #${String(c.id_lote).padStart(2, '0')}` : 'Directa'}</td>
+          <td><strong style="color: #0F766E;">${c.volumen_ingerido_ml} ml</strong> (${(c.volumen_ingerido_ml / 29.57).toFixed(1)} oz)</td>
+          <td><span class="tag-method">${metodo}</span></td>
+          <td>${c.tiempo_temperado_min || 10} min (${tempCheck})</td>
+        </tr>
+      `;
+    }).join('');
+
+    container.innerHTML = `
+      <div class="history-table-wrapper">
+        <table class="history-data-table">
+          <thead>
+            <tr>
+              <th>Fecha y Hora</th>
+              <th>Origen</th>
+              <th>Volumen</th>
+              <th>Método</th>
+              <th>Temperado</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rowsHtml}
+          </tbody>
+        </table>
+      </div>
+    `;
+  },
+
+  renderProfileForm() {
+    const lactante = StorageManager.get(StorageManager.KEYS.LACTANTE);
+    const usuario = StorageManager.get(StorageManager.KEYS.USUARIO);
+    if (!lactante || !usuario) return;
+
+    const inpBabyName = document.getElementById('prof-inp-babyname');
+    const inpBirthdate = document.getElementById('prof-inp-birthdate');
+    const inpWeight = document.getElementById('prof-inp-weight');
+    const inpFeedings = document.getElementById('prof-inp-feedings');
+    const inpCaregiver = document.getElementById('prof-inp-caregiver');
+    const selRole = document.getElementById('prof-sel-role');
+    const inpPhone = document.getElementById('prof-inp-phone');
+
+    if (inpBabyName) inpBabyName.value = lactante.nombre_bebe || "Sofía";
+    if (inpBirthdate && lactante.fecha_nacimiento) inpBirthdate.value = lactante.fecha_nacimiento;
+    if (inpWeight) inpWeight.value = lactante.peso_gramos || 3200;
+    if (inpFeedings) {
+      const calcTomas = document.getElementById('calc-inp-tomas');
+      inpFeedings.value = calcTomas ? calcTomas.value : 8;
+    }
+    if (inpCaregiver) inpCaregiver.value = usuario.nombre_completo || "Ana María Rodríguez";
+    if (selRole && usuario.rol_cuidador) selRole.value = usuario.rol_cuidador;
+    if (inpPhone) inpPhone.value = usuario.telefono_emergencia || "911";
+  },
+
+  saveProfileSettings() {
+    const babyName = document.getElementById('prof-inp-babyname')?.value.trim();
+    const birthdate = document.getElementById('prof-inp-birthdate')?.value;
+    const weight = parseFloat(document.getElementById('prof-inp-weight')?.value);
+    const feedings = parseInt(document.getElementById('prof-inp-feedings')?.value);
+    const caregiver = document.getElementById('prof-inp-caregiver')?.value.trim();
+    const role = document.getElementById('prof-sel-role')?.value;
+    const phone = document.getElementById('prof-inp-phone')?.value.trim();
+
+    if (!babyName || !weight || isNaN(weight) || weight <= 0) {
+      alert("Por favor completa el nombre del lactante y un peso válido en gramos.");
+      return;
+    }
+
+    const lactante = StorageManager.get(StorageManager.KEYS.LACTANTE) || {};
+    lactante.nombre_bebe = babyName;
+    if (birthdate) {
+      lactante.fecha_nacimiento = birthdate;
+      const diffDays = Math.floor((Date.now() - new Date(birthdate).getTime()) / (24 * 3600 * 1000));
+      if (!isNaN(diffDays) && diffDays >= 0) lactante.edad_dias = diffDays;
+    }
+    lactante.peso_gramos = weight;
+    StorageManager.set(StorageManager.KEYS.LACTANTE, lactante);
+
+    const usuario = StorageManager.get(StorageManager.KEYS.USUARIO) || {};
+    if (caregiver) usuario.nombre_completo = caregiver;
+    if (role) usuario.rol_cuidador = role;
+    if (phone) usuario.telefono_emergencia = phone;
+    StorageManager.set(StorageManager.KEYS.USUARIO, usuario);
+
+    // Sincronizar calculadora
+    const calcPeso = document.getElementById('calc-inp-peso');
+    const calcTomas = document.getElementById('calc-inp-tomas');
+    if (calcPeso) calcPeso.value = weight;
+    if (calcTomas && feedings) calcTomas.value = feedings;
+
+    SoundEffects.playChime('success');
+    this.showToast("Perfil clínico del lactante actualizado correctamente.");
+    this.refreshAllUI();
+  },
+
+  exportDataJSON() {
+    const data = {
+      usuario: StorageManager.get(StorageManager.KEYS.USUARIO),
+      lactante: StorageManager.get(StorageManager.KEYS.LACTANTE),
+      lotes: StorageManager.get(StorageManager.KEYS.LOTES),
+      consumos: StorageManager.get(StorageManager.KEYS.CONSUMOS),
+      evaluaciones: StorageManager.get(StorageManager.KEYS.EVALUACIONES),
+      exportDate: new Date().toISOString()
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `wawaweb_respaldo_${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    this.showToast("Respaldo JSON descargado con éxito.");
+  },
+
   generateClinicalPrintReport() {
     const lactante = StorageManager.get(StorageManager.KEYS.LACTANTE);
     const usuario = StorageManager.get(StorageManager.KEYS.USUARIO);
     const lotes = FIFOEngine.getActiveBatches();
+    const consumos = StorageManager.get(StorageManager.KEYS.CONSUMOS) || [];
     const evaluaciones = StorageManager.get(StorageManager.KEYS.EVALUACIONES) || [];
 
     const printContainer = document.getElementById('clinical-print-report');
@@ -1872,6 +2077,15 @@ const UIController = {
         <td>${l.volumen_ml} ml</td>
         <td>${l.ubicacion_termica}</td>
         <td>${FIFOEngine.getBatchStatus(l).label}</td>
+      </tr>
+    `).join('');
+
+    let consumosRows = consumos.slice(-5).reverse().map(c => `
+      <tr>
+        <td>${new Date(c.fecha_hora_consumo).toLocaleString('es')}</td>
+        <td>${c.id_lote ? `Lote #${c.id_lote}` : 'Directa'}</td>
+        <td>${c.volumen_ingerido_ml} ml</td>
+        <td>${c.metodo || 'biberon_lote'}</td>
       </tr>
     `).join('');
 
@@ -1912,7 +2126,17 @@ const UIController = {
         <tbody>${lotesRows || '<tr><td colspan="5">Sin lotes activos</td></tr>'}</tbody>
       </table>
 
-      <h3>2. Últimas Evaluaciones de Alarma Neonatal (AIEPI)</h3>
+      <h3>2. Registro Reciente de Tomas Suministradas</h3>
+      <table border="1" style="width: 100%; border-collapse: collapse; margin-bottom: 20px; text-align: left;">
+        <thead>
+          <tr style="background: #E2E8F0;">
+            <th>Fecha y Hora</th><th>Lote / Origen</th><th>Volumen</th><th>Método</th>
+          </tr>
+        </thead>
+        <tbody>${consumosRows || '<tr><td colspan="4">Sin tomas registradas</td></tr>'}</tbody>
+      </table>
+
+      <h3>3. Últimas Evaluaciones de Alarma Neonatal (AIEPI)</h3>
       <table border="1" style="width: 100%; border-collapse: collapse; margin-bottom: 20px; text-align: left;">
         <thead>
           <tr style="background: #E2E8F0;">
