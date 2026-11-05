@@ -8,4 +8,5 @@ docker-compose.yml
 .env
 iniciar_wawaweb.bat
 test_validation.db*
+main.go
 
