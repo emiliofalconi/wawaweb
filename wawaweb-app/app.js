@@ -250,15 +250,10 @@ const FIFOEngine = {
 
   discardBatch(loteId, razon) {
     const lotes = StorageManager.get(StorageManager.KEYS.LOTES) || [];
-    const lote = lotes.find(l => l.id_lote === loteId);
-    if (lote) {
-      lote.estado_conservacion = "Caducado";
-      lote.notas_observacion = (lote.notas_observacion ? lote.notas_observacion + " - " : "") + 
-        `Descartado por: ${razon || 'Caducidad biológica'} (${new Date().toLocaleDateString('es')})`;
-      StorageManager.set(StorageManager.KEYS.LOTES, lotes);
-      return true;
-    }
-    return false;
+    // Eliminar el lote del inventario activo y del almacenamiento local
+    const filteredLotes = lotes.filter(l => l.id_lote !== loteId);
+    StorageManager.set(StorageManager.KEYS.LOTES, filteredLotes);
+    return true;
   }
 };
 
@@ -323,33 +318,33 @@ const NeonatalTriage = {
     if (dangerCount >= 1) {
       return {
         level: "danger",
-        title: "EMERGENCIA MÉDICA NEONATAL",
-        description: "Se evidencian signos clínicos compatibles con deshidratación severa o choque hipovolémico. El neonato requiere atención pediátrica presencial inmediata.",
-        actionRequired: "Contactar de urgencia al 911 o acudir inmediatamente a la guardia pediátrica más cercana.",
+        title: "NECESITA ATENCIÓN MÉDICA INMEDIATA",
+        description: "El bebé presenta señales de deshidratación severa y decaimiento. Requiere atención de un médico o pediatra de forma urgente.",
+        actionRequired: "Llama a emergencias (911) o acude de inmediato al centro de salud o guardia pediátrica más cercana.",
         showCallButton: true
       };
     } else if (alertCount >= 2) {
       return {
         level: "alert",
-        title: "ALERTA TEMPRANA - MONITOREO ESTRICTO",
-        description: "Se detectan dos o más signos de deshidratación leve a moderada. El lactante se encuentra en riesgo de deterioro hidroelectrolítico.",
-        actionRequired: "Ofrecer tomas al pecho cada 1.5 a 2 horas. Verificar presencia de al menos 6 pañales mojados con orina clara en 24h. Si no mejora en 4 horas, consultar al pediatra.",
+        title: "ALERTA TEMPRANA - CUIDADO Y ATENCIÓN",
+        description: "Se detectan dos o más señales de pérdida de líquidos. Tu bebé necesita reponer hidratación con calma y vigilancia.",
+        actionRequired: "Ofrécele el pecho más seguido (cada hora y media o 2 horas). Cuenta al menos 6 pañales con orina clara en 24 horas. Si no notas mejoría en 4 horas, consulta a su pediatra.",
         showCallButton: false
       };
     } else if (alertCount === 1) {
       return {
         level: "alert",
-        title: "VIGILANCIA PREVENTIVA EN EL HOGAR",
-        description: "Se observa un signo aislado de alerta. Vigilar tolerancia oral, frecuencia de micción y llanto con lágrimas.",
-        actionRequired: "Mantener hidratación a libre demanda e hidratar a la madre lactante.",
+        title: "OBSERVACIÓN PREVENTIVA EN CASA",
+        description: "Se observa una señal leve para vigilar. Revisa si toma bien el pecho, si moja sus pañales y si llora con lágrimas.",
+        actionRequired: "Mantén la lactancia a libre demanda y recuerda a mamá tomar suficiente agua.",
         showCallButton: false
       };
     } else {
       return {
         level: "normal",
-        title: "ESTADO CLÍNICO ÓPTIMO (HIDRATADO)",
-        description: "Fontanela normotensa, mucosas húmedas, turgencia elástica inmediata y lágrimas presentes. El lactante no muestra signos de alarma neonatal.",
-        actionRequired: "Continuar con la lactancia materna exclusiva a libre demanda (8 a 12 tomas diarias).",
+        title: "TU BEBÉ SE ENCUENTRA BIEN HIDRATADO",
+        description: "Mollera suave y nivelada, boquita húmeda con saliva, piel con buena elasticidad y lágrimas al llorar. No hay señales de alarma.",
+        actionRequired: "Continúa con la lactancia materna a libre demanda (de 8 a 12 tomas al día).",
         showCallButton: false
       };
     }
@@ -519,14 +514,17 @@ const AuthController = {
     }
   },
 
-  showAuthScreen() {
+  showAuthScreen(defaultTab = 'login') {
     this.updateHeaderAuth(false);
     UIController.switchScreen('screen-auth');
-    const navAuth = document.getElementById('nav-btn-auth');
-    if (navAuth) navAuth.style.display = 'block';
+    this.switchTab(defaultTab);
     const navMain = document.getElementById('main-nav-bar');
     if (navMain) {
-      navMain.querySelectorAll('.nav-tab-btn:not(#nav-btn-auth)').forEach(b => b.style.opacity = '0.5');
+      navMain.style.display = 'none';
+    }
+    const mobNav = document.getElementById('mobile-bottom-nav');
+    if (mobNav) {
+      mobNav.style.display = 'none';
     }
   },
 
@@ -548,6 +546,8 @@ const AuthController = {
       if (formReg) formReg.style.display = 'block';
       if (btnLogin) btnLogin.classList.remove('active');
       if (btnReg) btnReg.classList.add('active');
+
+      this.goToRegStep(1);
       
       const birthInp = document.getElementById('reg-birthdate');
       if (birthInp) {
@@ -559,13 +559,110 @@ const AuthController = {
     }
   },
 
+  goToRegStep(step) {
+    const step1 = document.getElementById('reg-step-1');
+    const step2 = document.getElementById('reg-step-2');
+    const btn1 = document.getElementById('step-btn-1');
+    const btn2 = document.getElementById('step-btn-2');
+    const progressLine = document.getElementById('stepper-progress-line');
+
+    if (step === 2) {
+      const fullName = document.getElementById('reg-fullname').value.trim();
+      const email = document.getElementById('reg-email').value.trim();
+      const password = document.getElementById('reg-password').value;
+
+      if (!fullName || !email || !password || password.length < 6) {
+        this.validateAndGoToStep2();
+        return;
+      }
+
+      if (step1) step1.style.display = 'none';
+      if (step2) step2.style.display = 'block';
+      if (btn1) {
+        btn1.classList.remove('active');
+        btn1.classList.add('completed');
+      }
+      if (btn2) {
+        btn2.classList.add('active');
+        btn2.classList.remove('completed');
+      }
+      if (progressLine) progressLine.classList.add('step-2-active');
+
+      const babyNameInp = document.getElementById('reg-babyname');
+      if (babyNameInp) babyNameInp.focus();
+    } else {
+      if (step1) step1.style.display = 'block';
+      if (step2) step2.style.display = 'none';
+      if (btn1) {
+        btn1.classList.add('active');
+        btn1.classList.remove('completed');
+      }
+      if (btn2) {
+        btn2.classList.remove('active');
+        btn2.classList.remove('completed');
+      }
+      if (progressLine) progressLine.classList.remove('step-2-active');
+    }
+
+    const authContainer = document.querySelector('.auth-container');
+    if (authContainer) {
+      authContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  },
+
+  validateAndGoToStep2() {
+    const fullNameInp = document.getElementById('reg-fullname');
+    const emailInp = document.getElementById('reg-email');
+    const passwordInp = document.getElementById('reg-password');
+
+    const fullName = fullNameInp ? fullNameInp.value.trim() : '';
+    const email = emailInp ? emailInp.value.trim() : '';
+    const password = passwordInp ? passwordInp.value : '';
+
+    if (!fullName || fullName.length < 3) {
+      this.showAlert("Por favor ingresa tu nombre completo (mínimo 3 caracteres).", "error");
+      if (fullNameInp) fullNameInp.focus();
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      this.showAlert("El correo electrónico no tiene un formato válido (ej. cuidador@dominio.com).", "error");
+      if (emailInp) emailInp.focus();
+      return;
+    }
+
+    if (!password || password.length < 6) {
+      this.showAlert("La contraseña debe tener al menos 6 caracteres.", "error");
+      if (passwordInp) passwordInp.focus();
+      return;
+    }
+
+    const alertBox = document.getElementById('auth-alert-box');
+    if (alertBox) alertBox.style.display = 'none';
+
+    this.goToRegStep(2);
+  },
+
+  togglePasswordVisibility(inputId, btnEl) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    const isPass = input.type === 'password';
+    input.type = isPass ? 'text' : 'password';
+    if (btnEl) {
+      btnEl.innerHTML = isPass
+        ? `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`
+        : `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
+      btnEl.setAttribute('aria-label', isPass ? 'Ocultar contraseña' : 'Ver contraseña');
+    }
+  },
+
   onBirthDateChange(dateVal) {
     const hint = document.getElementById('reg-calc-days-hint');
     if (!hint) return;
     if (!dateVal) {
       hint.innerText = "Edad: -- días";
-      hint.style.color = "#0284C7";
-      hint.style.background = "#E0F2FE";
+      hint.classList.remove('is-error');
       return;
     }
 
@@ -576,13 +673,11 @@ const AuthController = {
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
     if (diffDays < 0) {
-      hint.innerText = "⚠️ Fecha futura no permitida";
-      hint.style.color = "#DC2626";
-      hint.style.background = "#FEE2E2";
+      hint.innerText = "Fecha futura no permitida";
+      hint.classList.add('is-error');
     } else {
       hint.innerText = `Edad calculada: ${diffDays} día${diffDays === 1 ? '' : 's'} (automático)`;
-      hint.style.color = "#0284C7";
-      hint.style.background = "#E0F2FE";
+      hint.classList.remove('is-error');
     }
   },
 
@@ -592,6 +687,7 @@ const AuthController = {
     box.className = `auth-alert ${type}`;
     box.innerText = msg;
     box.style.display = 'block';
+    box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   },
 
   async handleLogin(e) {
@@ -613,7 +709,7 @@ const AuthController = {
     } finally {
       if (btn) {
         btn.disabled = false;
-        btn.innerText = "Acceder al Sistema Asistencial";
+        btn.innerText = "Entrar a WawaWeb";
       }
     }
   },
@@ -640,28 +736,41 @@ const AuthController = {
     const sex = document.getElementById('reg-sex').value;
 
     if (!fullName || fullName.length < 3) {
+      this.goToRegStep(1);
       this.showAlert("El nombre completo del cuidador debe tener al menos 3 caracteres.", "error");
+      const el = document.getElementById('reg-fullname');
+      if (el) el.focus();
       return;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
+      this.goToRegStep(1);
       this.showAlert("El correo electrónico no tiene un formato válido (ej. cuidador@dominio.com).", "error");
+      const el = document.getElementById('reg-email');
+      if (el) el.focus();
       return;
     }
 
     if (!password || password.length < 6) {
+      this.goToRegStep(1);
       this.showAlert("La contraseña debe tener un mínimo de 6 caracteres.", "error");
+      const el = document.getElementById('reg-password');
+      if (el) el.focus();
       return;
     }
 
     if (!babyName || babyName.length < 2) {
       this.showAlert("El nombre del recién nacido debe tener al menos 2 caracteres.", "error");
+      const el = document.getElementById('reg-babyname');
+      if (el) el.focus();
       return;
     }
 
     if (!birthDate) {
       this.showAlert("Por favor selecciona la fecha de nacimiento del recién nacido.", "error");
+      const el = document.getElementById('reg-birthdate');
+      if (el) el.focus();
       return;
     }
 
@@ -670,22 +779,29 @@ const AuthController = {
     today.setHours(23, 59, 59, 999);
     if (bDate > today) {
       this.showAlert("La fecha de nacimiento no puede ser posterior al día de hoy.", "error");
+      const el = document.getElementById('reg-birthdate');
+      if (el) el.focus();
       return;
     }
 
     if (isNaN(weight) || weight <= 0) {
       this.showAlert("El peso del bebé debe ser un número positivo mayor a 0 gramos (no se permiten números negativos).", "error");
+      const el = document.getElementById('reg-weight');
+      if (el) el.focus();
       return;
     }
 
     if (weight < 1500 || weight > 12000) {
       this.showAlert("El peso del recién nacido debe encontrarse en el rango de 1.500 g a 12.000 g.", "error");
+      const el = document.getElementById('reg-weight');
+      if (el) el.focus();
       return;
     }
 
     const consentCheck = document.getElementById('reg-consent');
     if (!consentCheck || !consentCheck.checked) {
-      this.showAlert("Debes aceptar el consentimiento informado para continuar con el registro asistencial.", "error");
+      this.showAlert("Debes aceptar las condiciones de consentimiento para crear tu cuenta.", "error");
+      if (consentCheck) consentCheck.focus();
       return;
     }
 
@@ -719,7 +835,7 @@ const AuthController = {
     } finally {
       if (btn) {
         btn.disabled = false;
-        btn.innerText = "Crear Cuenta y Comenzar";
+        btn.innerText = "Crear Cuenta y Comenzar ✓";
       }
     }
   },
@@ -786,8 +902,8 @@ const AuthController = {
     UIController.switchScreen('screen-dashboard');
 
     if (showGreeting) {
-      const shortName = user.full_name ? user.full_name.split(' ')[0] : 'Usuario';
-      UIController.showToast(`¡Bienvenida/o, ${shortName}! Datos cargados desde la Base de Datos SQLite.`);
+      const shortName = user.full_name ? user.full_name.split(' ')[0] : 'Familia';
+      UIController.showToast(`¡Bienvenida/o, ${shortName}! Tus datos se han sincronizado correctamente.`);
     }
   },
 
@@ -799,16 +915,23 @@ const AuthController = {
     const babyPill = document.getElementById('header-baby-pill');
     const navAuth = document.getElementById('nav-btn-auth');
     const navMain = document.getElementById('main-nav-bar');
+    const mobNav = document.getElementById('mobile-bottom-nav');
 
     if (isLoggedIn && this.currentUser) {
       if (userBadge) userBadge.style.display = 'flex';
-      if (loginBtn) loginBtn.style.display = 'none';
+      if (loginBtn) {
+        loginBtn.style.setProperty('display', 'none', 'important');
+      }
       if (userName) userName.innerText = this.currentUser.full_name.split(' ')[0];
       if (userAvatar) userAvatar.innerText = this.currentUser.full_name.charAt(0).toUpperCase();
       if (babyPill) babyPill.style.display = 'inline-flex';
       if (navAuth) navAuth.style.display = 'none';
       if (navMain) {
+        navMain.style.display = 'flex';
         navMain.querySelectorAll('.nav-tab-btn').forEach(b => b.style.opacity = '1');
+      }
+      if (mobNav) {
+        mobNav.style.display = 'flex';
       }
 
       // Actualizar datos en pantalla de perfil
@@ -833,8 +956,12 @@ const AuthController = {
       }
     } else {
       if (userBadge) userBadge.style.display = 'none';
-      if (loginBtn) loginBtn.style.display = 'inline-block';
+      if (loginBtn) {
+        loginBtn.style.setProperty('display', 'inline-flex', 'important');
+      }
       if (babyPill) babyPill.style.display = 'none';
+      if (navMain) navMain.style.display = 'none';
+      if (mobNav) mobNav.style.display = 'none';
     }
   },
 
@@ -843,9 +970,22 @@ const AuthController = {
     StorageManager.clearAll();
     this.currentUser = null;
     this.currentInfant = null;
+
+    // Limpiar campos de inicio de sesión y formulario de registro
+    const loginEmail = document.getElementById('login-email');
+    if (loginEmail) loginEmail.value = '';
+    const loginPass = document.getElementById('login-password');
+    if (loginPass) loginPass.value = '';
+    const regForm = document.getElementById('form-register');
+    if (regForm) regForm.reset();
+
     this.updateHeaderAuth(false);
-    UIController.refreshAllUI();
-    this.showAuthScreen();
+    this.showAuthScreen('login');
+    try {
+      UIController.refreshAllUI();
+    } catch (e) {
+      console.warn("[AuthController] UI refresh on logout:", e);
+    }
     UIController.showToast('Sesión cerrada correctamente.');
   }
 };
@@ -872,6 +1012,9 @@ const UIController = {
     const savedTheme = localStorage.getItem('wawaweb_theme') || 
       (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
     this.applyTheme(savedTheme);
+
+    const savedColorScheme = localStorage.getItem('wawaweb_color_scheme') || 'default';
+    this.applyColorScheme(savedColorScheme);
   },
 
   toggleDarkMode() {
@@ -879,7 +1022,37 @@ const UIController = {
     const next = current === 'dark' ? 'light' : 'dark';
     this.applyTheme(next);
     localStorage.setItem('wawaweb_theme', next);
-    this.showToast(next === 'dark' ? 'Modo noche activado' : 'Modo cálido activado');
+    this.showToast(next === 'dark' ? 'Modo noche activado' : 'Modo día activado');
+  },
+
+  toggleColorScheme() {
+    const current = document.documentElement.getAttribute('data-color-scheme') || 'default';
+    const next = current === 'blue' ? 'default' : 'blue';
+    this.applyColorScheme(next);
+    localStorage.setItem('wawaweb_color_scheme', next);
+    this.showToast(next === 'blue' ? 'Paleta Azul Paternidad activada' : 'Paleta Rosa Maternal activada');
+  },
+
+  applyColorScheme(scheme) {
+    if (scheme === 'blue') {
+      document.documentElement.setAttribute('data-color-scheme', 'blue');
+      const metaTheme = document.querySelector('meta[name="theme-color"]');
+      if (metaTheme) metaTheme.setAttribute('content', '#2B6CB0');
+      const btn = document.getElementById('btn-palette-toggle');
+      if (btn) {
+        btn.setAttribute('title', 'Cambiar a Paleta Rosa Maternal');
+        btn.classList.add('palette-active-blue');
+      }
+    } else {
+      document.documentElement.removeAttribute('data-color-scheme');
+      const metaTheme = document.querySelector('meta[name="theme-color"]');
+      if (metaTheme) metaTheme.setAttribute('content', '#C86870');
+      const btn = document.getElementById('btn-palette-toggle');
+      if (btn) {
+        btn.setAttribute('title', 'Cambiar a Paleta Azul Paternidad');
+        btn.classList.remove('palette-active-blue');
+      }
+    }
   },
 
   applyTheme(theme) {
@@ -970,13 +1143,21 @@ const UIController = {
 
   switchScreen(screenId) {
     if (!ApiClient.getToken() && screenId !== 'screen-auth') {
-      this.showToast('Por favor inicia sesión para acceder al sistema asistencial.');
+      this.showToast('Por favor inicia sesión para continuar.');
       screenId = 'screen-auth';
     }
 
     this.currentScreen = screenId;
 
     document.querySelectorAll('.nav-tab-btn').forEach(b => {
+      if (b.getAttribute('data-screen') === screenId) {
+        b.classList.add('active');
+      } else {
+        b.classList.remove('active');
+      }
+    });
+
+    document.querySelectorAll('.mob-nav-item').forEach(b => {
       if (b.getAttribute('data-screen') === screenId) {
         b.classList.add('active');
       } else {
@@ -992,6 +1173,12 @@ const UIController = {
     if (target) {
       target.classList.add('active-screen');
       window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Centrar automáticamente la pestaña activa en la barra de navegación móvil
+    const activeBtn = document.querySelector(`.nav-tab-btn[data-screen="${screenId}"]`);
+    if (activeBtn) {
+      activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
     }
 
     if (screenId === 'screen-dashboard') this.renderDashboard();
@@ -1027,11 +1214,14 @@ const UIController = {
     const usuario = StorageManager.get(StorageManager.KEYS.USUARIO);
 
     // Calcular días de vida basados en la fecha de nacimiento si está disponible
-    let diasVida = lactante.edad_dias || 15;
-    if (lactante.fecha_nacimiento) {
-      const birth = new Date(lactante.fecha_nacimiento).getTime();
-      const diffDays = Math.floor((Date.now() - birth) / (24 * 3600 * 1000));
-      if (!isNaN(diffDays) && diffDays >= 0) diasVida = diffDays;
+    let diasVida = 15;
+    if (lactante) {
+      diasVida = lactante.edad_dias || 15;
+      if (lactante.fecha_nacimiento) {
+        const birth = new Date(lactante.fecha_nacimiento).getTime();
+        const diffDays = Math.floor((Date.now() - birth) / (24 * 3600 * 1000));
+        if (!isNaN(diffDays) && diffDays >= 0) diasVida = diffDays;
+      }
     }
 
     const elBabyName = document.querySelectorAll('.baby-display-name');
@@ -1046,7 +1236,7 @@ const UIController = {
     if (elDashMeta) {
       if (lactante) {
         const roleStr = (usuario && usuario.rol_cuidador) ? usuario.rol_cuidador.replace('_', ' ') : 'Lactancia Materna';
-        elDashMeta.innerText = `${lactante.edad_dias} días de vida • ${Number(lactante.peso_gramos).toLocaleString('es')} g • ${lactante.sexo || 'Lactante'} • ${roleStr}`;
+        elDashMeta.innerText = `${diasVida} días de vida • ${Number(lactante.peso_gramos || 3200).toLocaleString('es')} g • ${lactante.sexo || 'Lactante'} • ${roleStr}`;
       } else {
         elDashMeta.innerText = "Inicia sesión para visualizar los datos del lactante desde la base de datos.";
       }
@@ -1098,25 +1288,40 @@ const UIController = {
       return diffHours >= 48;
     });
 
+    // Actualizar contador dinámico en la campana superior de alertas
+    const alertBatchesCount = activeBatches.filter(b => {
+      const st = FIFOEngine.getBatchStatus(b);
+      return st.state === 'yellow' || st.state === 'red';
+    }).length;
+    const bellBadge = document.getElementById('header-bell-badge');
+    if (bellBadge) {
+      if (alertBatchesCount > 0) {
+        bellBadge.innerText = String(alertBatchesCount);
+        bellBadge.style.display = 'flex';
+      } else {
+        bellBadge.style.display = 'none';
+      }
+    }
+
     if (alertContainer) {
       if (refriBatches48h.length > 0) {
         const urgentBatch = refriBatches48h[0];
         const diffHours = Math.round((Date.now() - new Date(urgentBatch.fecha_hora_extraccion).getTime()) / (3600 * 1000));
         alertContainer.innerHTML = `
-          <div style="background: #FFFBEB; border: 2px solid #F59E0B; border-radius: 12px; padding: 14px 16px; box-shadow: 0 2px 4px rgba(245, 158, 11, 0.1);">
-            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
-              <span style="font-size: 20px;">⚠️</span>
-              <strong style="font-size: 13.5px; color: #92400E; text-transform: uppercase; letter-spacing: 0.04em;">Alerta Proactiva: Frasco en Refrigerador (≥ 48 horas)</strong>
+          <div class="proactive-alert-banner">
+            <div class="proactive-alert-header">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              <strong>Alerta Proactiva: Frasco en Refrigerador (≥ 48 horas)</strong>
             </div>
-            <p style="font-size: 13px; color: #78350F; margin: 0 0 10px; line-height: 1.4;">
-              El <strong>Lote #${String(urgentBatch.id_lote).padStart(2, '0')}</strong> ha cumplido <strong>${diffHours} horas</strong> en refrigerador. Para preservar al máximo sus anticuerpos sIgA y nutrientes, se sugiere <strong>consumirlo en la próxima toma</strong> o <strong>pasarlo al congelador (-18 °C)</strong> de inmediato.
+            <p class="proactive-alert-body">
+              El <strong>Frasco #${String(urgentBatch.id_lote).padStart(2, '0')}</strong> ha cumplido <strong>${diffHours} horas</strong> en refrigerador. Para aprovechar al máximo sus nutrientes y defensas naturales, sugerimos <strong>ofrecerlo en la próxima toma</strong> o <strong>pasarlo al congelador</strong> de inmediato.
             </p>
             <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-              <button class="btn-primary" style="font-size: 12px; padding: 6px 14px; background: #D97706; border-color: #D97706;" onclick="UIController.openConsumeModal(${urgentBatch.id_lote})">
-                🍼 Consumir en Próxima Toma
+              <button class="btn-primary" style="width: auto; font-size: 12px; padding: 7px 14px;" onclick="UIController.openConsumeModal(${urgentBatch.id_lote})">
+                Consumir en Próxima Toma
               </button>
-              <button class="btn-secondary" style="font-size: 12px; padding: 6px 14px; border-color: #D97706; color: #92400E; background: white;" onclick="UIController.handleTransferToFreezer(${urgentBatch.id_lote})">
-                ❄️ Pasar al Congelador
+              <button class="btn-secondary" style="width: auto; font-size: 12px; padding: 7px 14px;" onclick="UIController.handleTransferToFreezer(${urgentBatch.id_lote})">
+                Pasar al Congelador
               </button>
             </div>
           </div>
@@ -1132,10 +1337,17 @@ const UIController = {
 
     if (!priority) {
       fifoContainer.innerHTML = `
-        <div class="fifo-primary-card" style="border-color: var(--neutral-300); background: var(--neutral-50);">
-          <div class="fifo-flag" style="background: var(--neutral-500);">Inventario Vacío</div>
-          <div class="fifo-card-title" style="color: var(--neutral-700);">No hay lotes disponibles</div>
-          <div class="fifo-card-subtitle">Registra una nueva extracción para activar la cola de prioridad FIFO.</div>
+        <div class="fifo-primary-card fifo-empty-card">
+          <div class="empty-state-illus">
+            <svg viewBox="0 0 48 48" width="40" height="40" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M18 14H30V18C32.2 18 34 19.8 34 22V38C34 40.2 32.2 42 30 42H18C15.8 42 14 40.2 14 38V22C14 19.8 15.8 18 18 18V14Z" fill="var(--primary-subtle)" stroke="var(--primary)" stroke-width="2.2" stroke-linejoin="round"/>
+              <path d="M20 14V10C20 7.8 21.8 6 24 6C26.2 6 28 7.8 28 10V14" stroke="var(--primary)" stroke-width="2.2" stroke-linecap="round"/>
+              <path d="M24 25V33M20 29H28" stroke="var(--secondary)" stroke-width="2.2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="fifo-flag" style="background: var(--bg-subtle); color: var(--neutral-600); border-color: var(--neutral-300);">Banco de Leche Listo</div>
+          <div class="fifo-card-title">Aún no tienes frascos guardados</div>
+          <div class="fifo-card-subtitle">Guarda tu primera extracción para que te avisemos cuál frasco usar primero y cuidar su frescura.</div>
           <button class="btn-primary" onclick="UIController.switchScreen('screen-extraction')">Registrar Primera Extracción</button>
         </div>
       `;
@@ -1149,17 +1361,27 @@ const UIController = {
 
     fifoContainer.innerHTML = `
       <div class="fifo-primary-card">
-        <div class="fifo-flag">Principio FIFO (PEPS) - Prioridad Biológica</div>
-        <div class="fifo-card-title">«Frasco Prioritario Hoy» (Lote #${String(lote.id_lote).padStart(2, '0')})</div>
+        <div class="fifo-flag">Primer Frasco en la Fila • Usar Primero</div>
+        <div class="fifo-card-title">«Frasco Recomendado Hoy» (Frasco #${String(lote.id_lote).padStart(2, '0')})</div>
         <div class="fifo-card-subtitle">
-          El lote más antiguo que aún está en perfecto estado y debe usarse primero. Consumir este frasco previene pérdidas y caducidades en el refrigerador o congelador.
+          Es el frasco que lleva más tiempo guardado en perfecto estado. Usarlo primero evita que se venza en la nevera o el congelador.
         </div>
 
         <div class="fifo-card-meta">
-          <div>
-            <div class="fifo-lot-code">LOTE #${String(lote.id_lote).padStart(2, '0')}</div>
-            <div style="font-size: 12px; color: var(--neutral-600); font-weight: 600; margin-top: 2px;">
-              ${locText} - <strong>${lote.volumen_ml} ml</strong> (${(lote.volumen_ml / 29.57).toFixed(1)} oz)
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div class="fifo-bottle-badge" aria-hidden="true">
+              <svg viewBox="0 0 32 32" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 9h8v3a3 3 0 0 1 3 3v11a3 3 0 0 1-3 3h-8a3 3 0 0 1-3-3V15a3 3 0 0 1 3-3V9z"/>
+                <path d="M13 9V6a3 3 0 0 1 6 0v3"/>
+                <line x1="13" y1="18" x2="19" y2="18"/>
+                <line x1="13" y1="22" x2="17" y2="22"/>
+              </svg>
+            </div>
+            <div>
+              <div class="fifo-lot-code">FRASCO #${String(lote.id_lote).padStart(2, '0')}</div>
+              <div style="font-size: 12px; color: var(--neutral-600); font-weight: 600; margin-top: 2px;">
+                ${locText} • <strong style="color: var(--primary);">${lote.volumen_ml} ml</strong> (${(lote.volumen_ml / 29.57).toFixed(1)} oz)
+              </div>
             </div>
           </div>
           <div class="fifo-countdown">
@@ -1170,19 +1392,21 @@ const UIController = {
 
         <div class="fifo-actions-row">
           <button class="btn-fifo-consume" onclick="UIController.openConsumeModal(${lote.id_lote})">
-            🍼 Despachar y Consumir Lote
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+            <span>Servir este Frasco</span>
           </button>
-          <button class="btn-fifo-transfer" style="background: #0284C7; border-color: #0284C7; color: white;" onclick="UIController.goToThawingFromPriority(${lote.id_lote})">
-            🌡️ Guía y Temporizador (10 min)
+          <button class="btn-fifo-transfer btn-fifo-sage" onclick="UIController.goToThawingFromPriority(${lote.id_lote})">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span>Temperar (10 min)</span>
           </button>
           ${isAmbiente ? `
-            <button class="btn-fifo-transfer" onclick="UIController.handleTransferToFridge(${lote.id_lote})" style="background: #0D9488; border-color: #0D9488; color: white;">
+            <button class="btn-fifo-transfer" onclick="UIController.handleTransferToFridge(${lote.id_lote})">
               Refrigerar
             </button>
           ` : ''}
           ${!isFreezer ? `
             <button class="btn-fifo-transfer" onclick="UIController.handleTransferToFreezer(${lote.id_lote})">
-              ❄️ Congelar
+              Congelar (-18 °C)
             </button>
           ` : ''}
         </div>
@@ -1211,9 +1435,15 @@ const UIController = {
 
     if (lotes.length === 0) {
       container.innerHTML = `
-        <div style="text-align: center; padding: 40px 20px; color: var(--neutral-500);">
-          <div style="font-size: 15px; font-weight: 700;">No hay frascos en esta sección</div>
-          <p style="font-size: 12.5px; margin-top: 4px;">Usa el botón de abajo para registrar una nueva extracción.</p>
+        <div class="empty-state-box">
+          <div class="empty-state-illus">
+            <svg viewBox="0 0 48 48" width="38" height="38" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="10" y="10" width="28" height="28" rx="6" fill="var(--primary-subtle)" stroke="var(--primary)" stroke-width="2"/>
+              <path d="M18 24H30M24 18V30" stroke="var(--primary)" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="empty-state-title">No hay frascos en esta sección</div>
+          <p class="empty-state-desc">Usa el botón de abajo para registrar una nueva extracción en el banco de leche.</p>
         </div>
       `;
       return;
@@ -1236,8 +1466,8 @@ const UIController = {
         <div class="batch-item-card ${cardStateClass}">
           <div class="batch-card-header">
             <div class="batch-id-tag">
-              LOTE #${String(lote.id_lote).padStart(2, '0')}
-              ${!isConsumed ? `<span class="fifo-order-badge">Posición FIFO #${index + 1}</span>` : ''}
+              FRASCO #${String(lote.id_lote).padStart(2, '0')}
+              ${!isConsumed ? `<span class="fifo-order-badge">Turno #${index + 1} para usar</span>` : ''}
             </div>
             <span class="batch-status-badge ${badgeClass}">${isConsumed ? 'Consumido' : status.label}</span>
           </div>
@@ -1303,8 +1533,15 @@ const UIController = {
     const nextLoteNum = lotes.length > 0 ? Math.max(...lotes.map(l => l.id_lote || 0)) + 1 : 1;
 
     previewBox.innerHTML = `
-      <strong>${vol} ml</strong> equivalen a <strong>${oz} fl oz</strong> (${jeringas} jeringas de 10 ml o ${cuch} cucharaditas).<br>
-      Identificador a asignar: <strong style="color: #0284C7;">#LOTE FIFO ${String(nextLoteNum).padStart(2, '0')}</strong> • Caducidad segura: <strong>${maxTime}</strong>.
+      <div class="ext-preview-stat-row">
+        <span class="ext-preview-main"><strong>${vol} ml</strong> equivalen a <strong>${oz} fl oz</strong></span>
+        <span class="ext-preview-sub">(${jeringas} jeringas de 10 ml o ${cuch} cucharaditas)</span>
+      </div>
+      <div class="ext-preview-meta-row">
+        <span>Número asignado: <strong style="color: var(--primary);">Frasco #${String(nextLoteNum).padStart(2, '0')}</strong></span>
+        <span class="ext-preview-dot">•</span>
+        <span>Tiempo recomendado: <strong>${maxTime}</strong></span>
+      </div>
     `;
   },
 
@@ -1367,7 +1604,7 @@ const UIController = {
     if (inpNotes) inpNotes.value = '';
 
     SoundEffects.playChime('success');
-    this.showToast(`Lote #${String(newBatch.id_lote).padStart(2, '0')} guardado en Base de Datos e insertado en cola FIFO.`);
+    this.showToast(`Frasco #${String(newBatch.id_lote).padStart(2, '0')} guardado correctamente en tu banco de leche.`);
     this.refreshAllUI();
     this.openLabelModal(newBatch);
   },
@@ -1391,8 +1628,8 @@ const UIController = {
     const elTime = document.getElementById('label-modal-time');
     const elDest = document.getElementById('label-modal-dest');
 
-    if (elId) elId.innerText = `#LOTE FIFO ${padId}`;
-    if (elTag) elTag.innerText = `LOTE #${padId}`;
+    if (elId) elId.innerText = `Frasco #${padId}`;
+    if (elTag) elTag.innerText = `FRASCO #${padId}`;
     if (elVol) elVol.innerText = `${batch.volumen_ml} ml (${(batch.volumen_ml / 29.57).toFixed(1)} oz)`;
     if (elDate) elDate.innerText = dateFormatted;
     if (elTime) elTime.innerText = timeFormatted;
@@ -1469,8 +1706,8 @@ const UIController = {
       const babyName = (lactante && lactante.nombre_bebe) ? lactante.nombre_bebe : 'Lactante';
       const daysOld = (lactante && lactante.edad_dias !== undefined) ? `${lactante.edad_dias} días de vida` : 'Edad no registrada';
       elBabyChip.innerHTML = `
-        <span>👶 <strong>${babyName}</strong> • ${daysOld} • Peso base: ${pesoGramos} g</span>
-        <span style="font-size: 0.76rem; color: #1E40AF; background: #DBEAFE; padding: 2px 6px; border-radius: 4px;">Fórmula: 150 ml/kg/día ÷ ${tomas} tomas</span>
+        <span><strong>${babyName}</strong> • ${daysOld} • Peso base: ${pesoGramos} g</span>
+        <span class="calc-formula-pill">Fórmula: 150 ml/kg/día ÷ ${tomas} tomas</span>
       `;
     }
 
@@ -1571,6 +1808,239 @@ const UIController = {
     this.refreshAllUI();
   },
 
+  togglePhotoRef(refId, btnEl) {
+    const accordion = document.getElementById(refId);
+    if (!accordion) return;
+    const isExpanded = accordion.classList.contains('expanded');
+    if (isExpanded) {
+      accordion.classList.remove('expanded');
+      if (btnEl) {
+        btnEl.setAttribute('aria-expanded', 'false');
+        btnEl.classList.remove('active');
+      }
+    } else {
+      accordion.classList.add('expanded');
+      if (btnEl) {
+        btnEl.setAttribute('aria-expanded', 'true');
+        btnEl.classList.add('active');
+      }
+    }
+  },
+
+  openPhotoModal(title, conditionKey) {
+    const modal = document.getElementById('clinical-photo-modal');
+    if (!modal) return;
+
+    const photoDict = {
+      'thaw-correct': {
+        state: 'Técnica Correcta',
+        badgeClass: 'badge-state-normal',
+        title: 'Baño María Pasivo (Fuera de la Llama)',
+        desc: 'Sumergir el recipiente de leche sellado en un cuenco con agua caliente previamente retirada del fuego directo (máximo 40 °C). Agitar suavemente en círculos para homogenizar la grasa natural.',
+        clinicalPoints: [
+          'Preserva los anticuerpos vivos (inmunoglobulina A secretora - sIgA).',
+          'Evita la desnaturalización térmica de la lisozima y lactoferrina.',
+          'Garantiza una distribución calórica uniforme sin puntos calientes.'
+        ],
+        svgPlaceholder: `<svg viewBox="0 0 120 120" width="80" height="80" fill="none" stroke="currentColor" stroke-width="2">
+          <ellipse cx="60" cy="90" rx="45" ry="16" fill="var(--bg-subtle)" stroke="var(--primary)"/>
+          <path d="M25 90 C25 105 95 105 95 90" fill="var(--primary-subtle)" stroke="var(--primary)"/>
+          <rect x="46" y="35" width="28" height="48" rx="5" fill="var(--bg-card)" stroke="var(--primary)" stroke-width="2.5"/>
+          <path d="M46 55 Q60 58 74 55 L74 78 Q60 82 46 78 Z" fill="var(--primary)" opacity="0.25"/>
+          <circle cx="60" cy="28" r="6" stroke="var(--secondary)" stroke-width="2"/>
+          <path d="M40 30 Q35 22 40 15 M80 30 Q85 22 80 15" stroke="var(--sem-green)" stroke-width="2" stroke-linecap="round" stroke-dasharray="2 3"/>
+        </svg>`
+      },
+      'thaw-danger': {
+        state: 'Peligro Crítico',
+        badgeClass: 'badge-state-alert',
+        title: 'Microondas o Fuego Directo',
+        desc: 'El microondas o hervir al fuego calienta de forma irregular creando zonas hirviendo invisibles capaces de quemar la mucosa bucofaríngea del bebé, destruyendo además todas las defensas inmunitarias.',
+        clinicalPoints: [
+          'Riesgo grave de quemaduras esofágicas por puntos calientes ("hot spots").',
+          'Destrucción irreversible de enzimas protectoras y vitaminas termosensibles.',
+          'Peligro de liberación de sustancias nocivas en recipientes no aptos.'
+        ],
+        svgPlaceholder: `<svg viewBox="0 0 120 120" width="80" height="80" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="25" y="30" width="70" height="55" rx="8" fill="var(--bg-card)" stroke="var(--sem-red)" stroke-width="2"/>
+          <rect x="32" y="38" width="40" height="38" rx="4" fill="var(--sem-red-bg)" stroke="var(--sem-red)" stroke-dasharray="3 3"/>
+          <line x1="82" y1="42" x2="88" y2="42" stroke="var(--sem-red)" stroke-width="2"/>
+          <line x1="82" y1="50" x2="88" y2="50" stroke="var(--sem-red)" stroke-width="2"/>
+          <circle cx="85" cy="65" r="4" stroke="var(--sem-red)" stroke-width="2"/>
+          <line x1="20" y1="20" x2="100" y2="100" stroke="var(--sem-red)" stroke-width="3" stroke-linecap="round"/>
+        </svg>`
+      },
+      'fontanela-normal': {
+        state: 'Signo Normal',
+        badgeClass: 'badge-state-normal',
+        title: 'Fontanela Normotensa (Plana al tacto)',
+        desc: 'Al palpar suavemente la parte superior de la cabeza con el bebé erguido y tranquilo, la fontanela anterior se siente plana, nivelada con la superficie del cráneo y ligeramente pulsátil al ritmo cardíaco.',
+        clinicalPoints: [
+          'Superficie plana sin depresión ni abombamiento excesivo.',
+          'Latido arterial suave perceptible, totalmente fisiológico.',
+          'Indica adecuada presión intracraneal y buen balance de líquidos corporales.'
+        ],
+        svgPlaceholder: `<svg viewBox="0 0 120 120" width="80" height="80" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="60" cy="65" r="38" fill="var(--bg-subtle)" stroke="var(--primary)" stroke-width="2.5"/>
+          <path d="M38 42 C48 48 72 48 82 42" stroke="var(--sem-green)" stroke-width="3.5" stroke-linecap="round"/>
+          <circle cx="50" cy="65" r="3" fill="var(--primary)"/>
+          <circle cx="70" cy="65" r="3" fill="var(--primary)"/>
+          <path d="M55 78 Q60 83 65 78" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>`
+      },
+      'fontanela-alert': {
+        state: 'Signo de Alarma',
+        badgeClass: 'badge-state-alert',
+        title: 'Fontanela Deprimida o Hundida',
+        desc: 'La fontanela anterior se aprecia visiblemente hundida o se palpa como un desnivel marcado por debajo de los bordes óseos del cráneo. Es un signo clásico de deshidratación moderada a severa.',
+        clinicalPoints: [
+          'Hundimiento apreciable a simple vista o al deslizamiento suave del pulpejo.',
+          'Disminución del turgor cerebral por pérdida de líquido extracelular.',
+          'Requiere evaluación médica pediátrica urgente o administración de tomas/rehidratación inmediata.'
+        ],
+        svgPlaceholder: `<svg viewBox="0 0 120 120" width="80" height="80" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="60" cy="65" r="38" fill="var(--bg-subtle)" stroke="var(--sem-red)" stroke-width="2.5"/>
+          <path d="M38 38 Q60 56 82 38" stroke="var(--sem-red)" stroke-width="4" stroke-linecap="round"/>
+          <path d="M60 22 V35 M55 30 L60 36 L65 30" stroke="var(--sem-red)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="50" cy="68" r="3" fill="var(--sem-red)"/>
+          <circle cx="70" cy="68" r="3" fill="var(--sem-red)"/>
+          <path d="M55 82 Q60 77 65 82" stroke="var(--sem-red)" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>`
+      },
+      'mucosas-normal': {
+        state: 'Signo Normal',
+        badgeClass: 'badge-state-normal',
+        title: 'Mucosas Orales y Labios Húmedos',
+        desc: 'Los labios se muestran rosados y brillantes; la lengua y las encías presentan una capa continua de saliva líquida y fluida sin adherencias blanquecinas ni sequedad.',
+        clinicalPoints: [
+          'Labios suaves y humectados, sin fisuras ni descamación.',
+          'Saliva fluida y visible en cavidad oral y comisuras labiales.',
+          'Buena perfusión tisular periférica y óptimo estado de hidratación.'
+        ],
+        svgPlaceholder: `<svg viewBox="0 0 120 120" width="80" height="80" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M30 60 Q60 40 90 60 Q60 85 30 60 Z" fill="var(--sem-green-bg)" stroke="var(--sem-green)" stroke-width="2.5"/>
+          <circle cx="52" cy="58" r="2.5" fill="var(--sem-green)"/>
+          <circle cx="68" cy="58" r="2.5" fill="var(--sem-green)"/>
+          <path d="M45 66 Q60 74 75 66" stroke="var(--sem-green)" stroke-width="2" stroke-linecap="round"/>
+        </svg>`
+      },
+      'mucosas-alert': {
+        state: 'Signo de Alarma',
+        badgeClass: 'badge-state-alert',
+        title: 'Mucosas Orales Secas y Saliva Espesa',
+        desc: 'Lengua y encías blanquecinas, secas o pegajosas al tacto. Labios cuarteados o con pieles secas por falta de líquido circulante.',
+        clinicalPoints: [
+          'Falta de brillo y ausencia de saliva líquida en la boca.',
+          'Lengua áspera ("lengua de loro" en cuadros avanzados de deshidratación).',
+          'Alerta clínica de hipovolemia o aporte insuficiente de leche materna.'
+        ],
+        svgPlaceholder: `<svg viewBox="0 0 120 120" width="80" height="80" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M30 60 Q60 48 90 60 Q60 76 30 60 Z" fill="var(--sem-red-bg)" stroke="var(--sem-red)" stroke-width="2.5"/>
+          <line x1="50" y1="52" x2="52" y2="68" stroke="var(--sem-red)" stroke-width="2" stroke-linecap="round"/>
+          <line x1="62" y1="50" x2="60" y2="70" stroke="var(--sem-red)" stroke-width="2" stroke-linecap="round"/>
+          <line x1="72" y1="54" x2="70" y2="66" stroke="var(--sem-red)" stroke-width="2" stroke-linecap="round"/>
+        </svg>`
+      },
+      'pliegue-normal': {
+        state: 'Signo Normal',
+        badgeClass: 'badge-state-normal',
+        title: 'Signo del Pliegue Cutáneo Negativo',
+        desc: 'Al pellizcar con suavidad un pliegue de piel en el abdomen entre el pulgar y el índice durante 1 segundo y soltarlo, la piel recupera de inmediato su forma lisa (< 1 segundo).',
+        clinicalPoints: [
+          'Turgor dérmico elástico conservado.',
+          'Retorno instantáneo sin dejar huella ni pliegue residual.',
+          'Buen contenido hídrico celular y tisular intersticial.'
+        ],
+        svgPlaceholder: `<svg viewBox="0 0 120 120" width="80" height="80" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M25 70 Q60 62 95 70" stroke="var(--sem-green)" stroke-width="4" stroke-linecap="round"/>
+          <circle cx="60" cy="66" r="3" fill="var(--sem-green)"/>
+          <path d="M45 45 L52 55 M75 45 L68 55" stroke="var(--sem-green)" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>`
+      },
+      'pliegue-alert': {
+        state: 'Signo de Alarma',
+        badgeClass: 'badge-state-alert',
+        title: 'Signo del Pliegue Cutáneo Positivo (> 2s)',
+        desc: 'La piel pellizcada en el abdomen tarda 2 segundos o más en volver a su posición plana (se mantiene levantada como tienda de campaña). Es un signo cardenal de deshidratación con pérdida marcada de turgencia celular.',
+        clinicalPoints: [
+          'Pliegue cutáneo que permanece visible tras soltar los dedos.',
+          'Pérdida severa del espacio intersticial extracelular.',
+          'Criterio de alarma según OMS / AIEPI que amerita evaluación pediátrica urgente.'
+        ],
+        svgPlaceholder: `<svg viewBox="0 0 120 120" width="80" height="80" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M25 75 Q48 70 52 45 Q60 35 68 45 Q72 70 95 75" stroke="var(--sem-red)" stroke-width="3.5" stroke-linecap="round"/>
+          <path d="M38 35 L48 42 M82 35 L72 42" stroke="var(--sem-red)" stroke-width="2" stroke-linecap="round"/>
+        </svg>`
+      },
+      'ojos-normal': {
+        state: 'Signo Normal',
+        badgeClass: 'badge-state-normal',
+        title: 'Ojos Brillantes y Lágrimas Presentes',
+        desc: 'Los ojos se observan húmedos, vivaces y en posición anatómica normal respecto a las órbitas. Al llorar, el lactante produce lágrimas copiosas y visibles.',
+        clinicalPoints: [
+          'Globo ocular normotenso y córnea brillante.',
+          'Glándulas lagrimales plenamente funcionantes.',
+          'Mirada reactiva y con adecuado contacto visual.'
+        ],
+        svgPlaceholder: `<svg viewBox="0 0 120 120" width="80" height="80" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M30 60 Q60 38 90 60 Q60 82 30 60 Z" fill="var(--sem-green-bg)" stroke="var(--sem-green)" stroke-width="2.5"/>
+          <circle cx="60" cy="60" r="10" fill="var(--sem-green)" stroke="var(--sem-green)"/>
+          <circle cx="63" cy="57" r="3.5" fill="#fff"/>
+          <path d="M92 68 Q95 75 92 80 A3 3 0 0 1 89 77 Q89 73 92 68 Z" fill="var(--sem-green)" stroke="none"/>
+        </svg>`
+      },
+      'ojos-alert': {
+        state: 'Signo de Alarma',
+        badgeClass: 'badge-state-alert',
+        title: 'Ojos Hundidos y Llanto sin Lágrimas',
+        desc: 'Los ojos se ven profundos o apagados en sus cuencas orbitarias. Durante el llanto intenso no se observa caída de lágrimas en las mejillas ni humedad conjuntival.',
+        clinicalPoints: [
+          'Hundimiento del cojinete graso retro-orbitario por deshidratación.',
+          'Cese de la secreción lagrimal como mecanismo de ahorro hídrico.',
+          'Lactante irritable, con llanto débil o adormilado.'
+        ],
+        svgPlaceholder: `<svg viewBox="0 0 120 120" width="80" height="80" fill="none" stroke="currentColor" stroke-width="2">
+          <ellipse cx="60" cy="60" rx="32" ry="18" fill="var(--sem-red-bg)" stroke="var(--sem-red)" stroke-width="2" stroke-dasharray="3 3"/>
+          <circle cx="60" cy="60" r="8" fill="var(--sem-red)"/>
+          <path d="M50 42 Q60 36 70 42" stroke="var(--sem-red)" stroke-width="2" stroke-linecap="round"/>
+        </svg>`
+      }
+    };
+
+    const data = photoDict[conditionKey] || {
+      state: 'Referencia Clínica',
+      badgeClass: 'badge-state-normal',
+      title: title || 'Ejemplo Clínico',
+      desc: 'Consulta médica recomendada para contrastar hallazgos en tu bebé.',
+      clinicalPoints: ['Signo clínico de valoración de salud neonatal.'],
+      svgPlaceholder: ''
+    };
+
+    const titleEl = document.getElementById('clinical-photo-modal-title');
+    const badgeEl = document.getElementById('clinical-photo-modal-badge');
+    const graphicEl = document.getElementById('clinical-photo-modal-graphic');
+    const descEl = document.getElementById('clinical-photo-modal-desc');
+    const listEl = document.getElementById('clinical-photo-modal-points');
+
+    if (titleEl) titleEl.innerText = data.title;
+    if (badgeEl) {
+      badgeEl.className = `clinical-photo-badge ${data.badgeClass}`;
+      badgeEl.innerText = data.state;
+    }
+    if (graphicEl) graphicEl.innerHTML = data.svgPlaceholder;
+    if (descEl) descEl.innerText = data.desc;
+    if (listEl) {
+      listEl.innerHTML = data.clinicalPoints.map(p => `<li>${p}</li>`).join('');
+    }
+
+    modal.classList.add('show');
+  },
+
+  closePhotoModal() {
+    const modal = document.getElementById('clinical-photo-modal');
+    if (modal) modal.classList.remove('show');
+  },
+
   handleTransferToFridge(loteId) {
     if (confirm(`¿Transferir el Lote #${String(loteId).padStart(2, '0')} al refrigerador (4 °C) para prolongar su conservación hasta 4 días?`)) {
       FIFOEngine.transferToFridge(loteId);
@@ -1600,7 +2070,7 @@ const UIController = {
 
       FIFOEngine.discardBatch(loteId, reason);
       SoundEffects.playChime('alarm');
-      this.showToast(`Lote #${String(loteId).padStart(2, '0')} descartado por bioseguridad.`);
+      this.showToast(`Lote #${String(loteId).padStart(2, '0')} eliminado del banco de leche.`);
       this.refreshAllUI();
     }
   },
@@ -1730,7 +2200,7 @@ const UIController = {
 
     StorageManager.set(StorageManager.KEYS.EVALUACIONES, evaluaciones);
     SoundEffects.playChime('success');
-    this.showToast("Evaluación clínica guardada en la Base de Datos SQLite y en el historial.");
+    this.showToast("Revisión de bienestar guardada con éxito.");
   },
 
   async saveProfileToBackend() {
@@ -1756,7 +2226,7 @@ const UIController = {
       return;
     }
     if (weight < 1500 || weight > 12000) {
-      this.showToast("El peso del lactante debe encontrarse en el rango asistencial de 1.500 g a 12.000 g.");
+      this.showToast("El peso del bebé debe encontrarse entre 1.500 g y 12.000 g.");
       return;
     }
     if (isNaN(days) || days < 0) {
@@ -1802,7 +2272,7 @@ const UIController = {
       AuthController.updateHeaderAuth(true);
       this.refreshAllUI();
       SoundEffects.playChime('success');
-      this.showToast('Datos actualizados en la Base de Datos SQLite correctamente.');
+      this.showToast('Datos actualizados y guardados correctamente.');
     } catch (err) {
       this.showToast(`Error al guardar en base de datos: ${err.message}`);
     }
@@ -1885,7 +2355,7 @@ const UIController = {
 
     if (lotes.length === 0) {
       detailsBox.innerHTML = `
-        <div style="background: var(--neutral-50); border: 1px dashed var(--neutral-300); border-radius: var(--radius-md); padding: 14px; text-align: center; font-size: 12.5px; color: var(--neutral-500);">
+        <div class="empty-state-box" style="padding: 20px;">
           No se registraron extracciones el ${day} de ${this.selectedCalendarDate.toLocaleString('es', { month: 'long' })}.
         </div>
       `;
@@ -1895,7 +2365,7 @@ const UIController = {
     let itemsHtml = lotes.map(l => {
       const st = FIFOEngine.getBatchStatus(l);
       return `
-        <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: white; border: 1px solid var(--neutral-200); border-radius: var(--radius-sm); margin-bottom: 6px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: var(--bg-card); border: 1px solid var(--neutral-200); border-radius: var(--radius-sm); margin-bottom: 6px;">
           <div>
             <strong>LOTE #${String(l.id_lote).padStart(2, '0')}</strong> (${l.volumen_ml} ml)
             <div style="font-size: 11px; color: var(--neutral-500);">${l.ubicacion_termica === 'Ambiente' ? 'Ambiente (≤25 °C)' : (l.ubicacion_termica === 'Refrigerador_4C' ? 'Refrigerador (4 °C)' : 'Congelador (-18 °C)')}</div>
@@ -1920,9 +2390,15 @@ const UIController = {
     const consumos = StorageManager.get(StorageManager.KEYS.CONSUMOS) || [];
     if (consumos.length === 0) {
       container.innerHTML = `
-        <div style="text-align: center; padding: 40px 20px; color: var(--neutral-500);">
-          <div style="font-size: 15px; font-weight: 700;">No hay tomas registradas</div>
-          <p style="font-size: 12.5px; margin-top: 4px;">Usa el botón "Registrar Toma" para añadir una administración de leche.</p>
+        <div class="empty-state-box">
+          <div class="empty-state-illus">
+            <svg viewBox="0 0 48 48" width="38" height="38" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M16 8H32C34.2 8 36 9.8 36 12V36C36 38.2 34.2 40 32 40H16C13.8 40 12 38.2 12 36V12C12 9.8 13.8 8 16 8Z" fill="var(--primary-subtle)" stroke="var(--primary)" stroke-width="2"/>
+              <path d="M18 18H30M18 24H30M18 30H24" stroke="var(--primary)" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="empty-state-title">No hay tomas registradas</div>
+          <p class="empty-state-desc">Usa el botón «+ Registrar Toma» para añadir una administración de leche materna.</p>
         </div>
       `;
       return;
@@ -1943,14 +2419,14 @@ const UIController = {
         month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
       });
       const metodo = methodLabels[c.metodo] || c.metodo || 'Biberón';
-      const tempCheck = c.temperatura_temperado_ok ? '✅ Dorso muñeca' : '⚠️ No verificada';
+      const tempCheck = c.temperatura_temperado_ok ? '✓ Dorso muñeca' : 'No verificada';
       return `
         <tr>
-          <td><strong>${fecha}</strong></td>
-          <td>${c.id_lote ? `Lote #${String(c.id_lote).padStart(2, '0')}` : 'Directa'}</td>
-          <td><strong style="color: #0F766E;">${c.volumen_ingerido_ml} ml</strong> (${(c.volumen_ingerido_ml / 29.57).toFixed(1)} oz)</td>
-          <td><span class="tag-method">${metodo}</span></td>
-          <td>${c.tiempo_temperado_min || 10} min (${tempCheck})</td>
+          <td data-label="Fecha y Hora"><strong>${fecha}</strong></td>
+          <td data-label="Origen">${c.id_lote ? `Lote #${String(c.id_lote).padStart(2, '0')}` : 'Directa'}</td>
+          <td data-label="Volumen"><strong style="color: var(--primary);">${c.volumen_ingerido_ml} ml</strong> (${(c.volumen_ingerido_ml / 29.57).toFixed(1)} oz)</td>
+          <td data-label="Método"><span class="tag-method">${metodo}</span></td>
+          <td data-label="Temperado">${c.tiempo_temperado_min || 10} min (${tempCheck})</td>
         </tr>
       `;
     }).join('');
@@ -2116,7 +2592,7 @@ const UIController = {
         </tr>
       </table>
 
-      <h3>1. Estado del Banco de Leche en el Hogar (Inventario FIFO)</h3>
+      <h3>1. Estado del Banco de Leche en el Hogar (Frascos Activos)</h3>
       <table border="1" style="width: 100%; border-collapse: collapse; margin-bottom: 20px; text-align: left;">
         <thead>
           <tr style="background: #E2E8F0;">

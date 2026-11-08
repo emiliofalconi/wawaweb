@@ -13,7 +13,7 @@
   <!-- Hoja de Estilos de la Aplicación -->
   <link rel="stylesheet" href="styles.css">
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#0D9488">
+  <meta name="theme-color" content="#C86870">
 </head>
 <body>
 
@@ -22,7 +22,12 @@
        ========================================================================= -->
   <header class="top-navbar">
     <div class="brand-group" onclick="UIController.switchScreen('screen-dashboard')">
-      <div class="brand-icon">W</div>
+      <div class="brand-icon" aria-label="WawaWeb">
+        <svg viewBox="0 0 36 36" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M18 4.5C18 4.5 9.5 14.2 9.5 21C9.5 25.6944 13.3056 29.5 18 29.5C22.6944 29.5 26.5 25.6944 26.5 21C26.5 14.2 18 4.5 18 4.5Z" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="rgba(255,255,255,0.18)"/>
+          <path d="M18 24.5C18 24.5 13.5 21.6 13.5 19C13.5 17.5 14.7 16.5 16 16.5C17 16.5 17.6 17.1 18 17.8C18.4 17.1 19 16.5 20 16.5C21.3 16.5 22.5 17.5 22.5 19C22.5 21.6 18 24.5 18 24.5Z" fill="currentColor"/>
+        </svg>
+      </div>
       <div class="brand-text">
         <h1>WawaWeb <span class="brand-badge">COIL 202715</span></h1>
         <p class="brand-subtitle">UCAB (Informática) • PUCE (Enfermería)</p>
@@ -31,17 +36,47 @@
 
     <div class="top-meta">
       <div class="coil-pill" id="header-baby-pill" style="display: none;">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--primary); margin-right: 4px; vertical-align: -2px;">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+        </svg>
         <span><span class="coil-pill-label">Paciente: </span><span class="baby-display-name">---</span> (<span id="header-baby-days">--</span> d)</span>
       </div>
       
-      <div class="user-profile-badge" id="header-user-badge" style="display: none;">
-        <span class="user-avatar-tiny" id="header-user-avatar">👤</span>
+      <div class="user-profile-badge" id="header-user-badge" style="display: none;" onclick="UIController.switchScreen('screen-profile')" title="Mi Perfil y Cuenta">
+        <span class="user-avatar-tiny" id="header-user-avatar">U</span>
         <span class="user-name-label" id="header-user-name">Usuario</span>
-        <button class="btn-logout-tiny" onclick="AuthController.logout()" title="Cerrar Sesión">Salir</button>
+        <button class="btn-logout-tiny" onclick="event.stopPropagation(); AuthController.logout()" title="Cerrar Sesión">Salir</button>
       </div>
 
       <button class="btn-primary header-btn-login" id="header-btn-login" onclick="UIController.switchScreen('screen-auth')" style="display: none;">
         Entrar
+      </button>
+
+      <button class="theme-toggle-btn" onclick="UIController.toggleDarkMode()" title="Alternar Modo Día / Noche" aria-label="Alternar tema">
+        <svg id="theme-icon-moon" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+        <svg id="theme-icon-sun" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+      </button>
+
+      <button class="palette-toggle-btn" id="btn-palette-toggle" onclick="UIController.toggleColorScheme()" title="Cambiar a Paleta Azul Paternidad" aria-label="Alternar paleta maternal o paternidad">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle>
+          <circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle>
+          <circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle>
+          <circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle>
+          <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.563-2.512 5.563-5.563C21.438 6.5 17.5 2 12 2z"></path>
+        </svg>
       </button>
 
       <button class="notification-bell-btn" onclick="UIController.switchScreen('screen-inventory')" title="Lotes en Alerta">
@@ -49,24 +84,52 @@
           <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
           <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
         </svg>
-        <span class="bell-badge">2</span>
+        <span class="bell-badge" id="header-bell-badge" style="display: none;">0</span>
       </button>
     </div>
   </header>
 
   <!-- =========================================================================
-       BARRA DE PANTALLAS (SUB-NAVBAR)
+       BARRA DE PANTALLAS (SUB-NAVBAR CON ACCESOS RÁPIDOS)
        ========================================================================= -->
-  <nav class="screens-nav-bar" id="main-nav-bar">
-    <button class="nav-tab-btn" data-screen="screen-auth" id="nav-btn-auth" style="display: none;">Iniciar Sesión</button>
-    <button class="nav-tab-btn active" data-screen="screen-dashboard">Dashboard FIFO</button>
-    <button class="nav-tab-btn" data-screen="screen-inventory">Banco de Leche</button>
-    <button class="nav-tab-btn" data-screen="screen-extraction">Nueva Extracción</button>
-    <button class="nav-tab-btn" data-screen="screen-calculator">Calculadora</button>
-    <button class="nav-tab-btn" data-screen="screen-calendar">Calendario Semafórico</button>
-    <button class="nav-tab-btn" data-screen="screen-thawing">Temperado Seguro</button>
-    <button class="nav-tab-btn" data-screen="screen-triage">Alerta Neonatal</button>
-    <button class="nav-tab-btn" data-screen="screen-profile">Perfil y Reportes</button>
+  <nav class="screens-nav-bar" id="main-nav-bar" style="display: none;">
+    <button class="nav-tab-btn active" data-screen="screen-dashboard">
+      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+      <span>Inicio</span>
+    </button>
+    <button class="nav-tab-btn" data-screen="screen-extraction">
+      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      <span>Extraer Leche</span>
+    </button>
+    <button class="nav-tab-btn" data-screen="screen-inventory">
+      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 7h6v2a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2V7z"/><path d="M10 7V5a2 2 0 0 1 4 0v2"/></svg>
+      <span>Banco de Leche</span>
+    </button>
+    <button class="nav-tab-btn" data-screen="screen-thawing">
+      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span>Temperar</span>
+    </button>
+    <button class="nav-tab-btn" data-screen="screen-intake-history">
+      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      <span>Tomas</span>
+    </button>
+    <span class="nav-divider-vertical" aria-hidden="true"></span>
+    <button class="nav-tab-btn" data-screen="screen-calculator">
+      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/></svg>
+      <span>Dosis</span>
+    </button>
+    <button class="nav-tab-btn" data-screen="screen-calendar">
+      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span>Calendario</span>
+    </button>
+    <button class="nav-tab-btn nav-tab-alert" data-screen="screen-triage">
+      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <span>Triaje Neonatal</span>
+    </button>
+    <button class="nav-tab-btn" data-screen="screen-profile">
+      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>Perfil</span>
+    </button>
   </nav>
 
   <!-- =========================================================================
@@ -76,14 +139,20 @@
     <div class="device-frame">
 
       <!-- ---------------------------------------------------------------------
-           PANTALLA 0: INICIO DE SESIÓN Y REGISTRO (AUTENTICACIÓN ASISTENCIAL)
+           PANTALLA 0: INICIO DE SESIÓN Y REGISTRO (ACCESO FAMILIAR)
            --------------------------------------------------------------------- -->
       <section id="screen-auth" class="app-screen">
         <div class="auth-container">
           <div class="auth-header">
-            <div class="auth-logo-badge">WawaWeb</div>
-            <h2 class="auth-title">Plataforma de Salud Digital</h2>
-            <p class="auth-subtitle">Gestión Trazable de Banco de Leche (FIFO) y Alarma Neonatal Temprana</p>
+            <div class="auth-logo-mark">
+              <svg viewBox="0 0 48 48" width="42" height="42" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M24 6C24 6 12 19 12 28.2C12 34.7169 17.3726 40 24 40C30.6274 40 36 34.7169 36 28.2C36 19 24 6 24 6Z" fill="var(--primary-subtle)" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M24 33C24 33 17.8 29 17.8 25.4C17.8 23.3 19.4 21.8 21.3 21.8C22.7 21.8 23.5 22.6 24 23.6C24.5 22.6 25.3 21.8 26.7 21.8C28.6 21.8 30.2 23.3 30.2 25.4C30.2 29 24 33 24 33Z" fill="var(--primary)"/>
+              </svg>
+            </div>
+            <div class="auth-logo-badge">WawaWeb • Salud Materno-Neonatal</div>
+            <h2 class="auth-title">Cuidado Lactante &amp; Banco de Leche</h2>
+            <p class="auth-subtitle">Organización fácil de tus frascos de leche materna y señales de bienestar para tu bebé</p>
           </div>
 
           <!-- Pestañas Iniciar Sesión / Crear Cuenta -->
@@ -103,17 +172,22 @@
           <form id="form-login" onsubmit="AuthController.handleLogin(event)">
             <div class="form-group">
               <label class="form-label" for="login-email">Correo Electrónico</label>
-              <input type="email" id="login-email" class="form-input" placeholder="correo@ejemplo.com" required>
+              <input type="email" id="login-email" class="form-input" placeholder="correo@ejemplo.com" required autocomplete="email">
             </div>
 
             <div class="form-group">
               <label class="form-label" for="login-password">Contraseña</label>
-              <input type="password" id="login-password" class="form-input" placeholder="Tu contraseña" required>
+              <div class="password-input-wrapper">
+                <input type="password" id="login-password" class="form-input" placeholder="Tu contraseña" required autocomplete="current-password">
+                <button type="button" class="btn-toggle-password" onclick="AuthController.togglePasswordVisibility('login-password', this)" aria-label="Ver u ocultar contraseña">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                </button>
+              </div>
             </div>
 
             <div class="auth-actions" style="margin-top: 18px;">
               <button type="submit" class="btn-primary" id="btn-submit-login" style="width: 100%;">
-                Acceder al Sistema Asistencial
+                Entrar a WawaWeb
               </button>
             </div>
 
@@ -122,94 +196,146 @@
             </div>
 
             <button type="button" class="btn-demo-quick" onclick="AuthController.loginDemo()">
-              ⚡ Acceso Rápido Demo (1 Clic)
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+              <span>Acceso Rápido Demo (1 Clic)</span>
             </button>
+
+            <div class="auth-switch-prompt">
+              ¿No tienes una cuenta aún? <a href="javascript:void(0)" onclick="AuthController.switchTab('register')">Crear cuenta nueva</a>
+            </div>
           </form>
 
-          <!-- Formulario de Registro -->
+          <!-- Formulario de Registro por Pasos (Wizard Ergonómico) -->
           <form id="form-register" style="display: none;" onsubmit="AuthController.handleRegister(event)">
-            <div class="auth-section-title">1. Datos del Cuidador / Usuario</div>
-            
-            <div class="form-group">
-              <label class="form-label" for="reg-fullname">Nombre Completo del Cuidador</label>
-              <input type="text" id="reg-fullname" class="form-input" placeholder="Nombre y Apellido" required>
-            </div>
-
-            <div class="form-row-2">
-              <div class="form-group">
-                <label class="form-label" for="reg-email">Correo Electrónico</label>
-                <input type="email" id="reg-email" class="form-input" placeholder="correo@ejemplo.com" required>
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="reg-password">Contraseña (mín. 6 caracteres)</label>
-                <input type="password" id="reg-password" class="form-input" placeholder="Mínimo 6 caracteres" minlength="6" required>
-              </div>
-            </div>
-
-            <div class="form-row-2">
-              <div class="form-group">
-                <label class="form-label" for="reg-role">Rol del Cuidador</label>
-                <select id="reg-role" class="form-select">
-                  <option value="Madre_Primeriza">Madre Primeriza</option>
-                  <option value="Monoparental">Monoparental</option>
-                  <option value="Red_Apoyo">Red de Apoyo</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="reg-phone">Teléfono de Emergencia</label>
-                <input type="text" id="reg-phone" class="form-input" placeholder="911 o teléfono de cabecera">
-              </div>
-            </div>
-
-            <div class="auth-section-title">2. Ficha Neonatal del Lactante</div>
-
-            <div class="form-row-2">
-              <div class="form-group">
-                <label class="form-label" for="reg-babyname">Nombre del Bebé</label>
-                <input type="text" id="reg-babyname" class="form-input" placeholder="Nombre del lactante" required>
-              </div>
-              <div class="form-group">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 4px;">
-                  <label class="form-label" for="reg-birthdate" style="margin-bottom: 0;">Fecha de Nacimiento</label>
-                  <span id="reg-calc-days-hint" style="font-size: 0.78rem; font-weight: 600; color: #0284C7; background: #E0F2FE; padding: 2px 8px; border-radius: 6px;">
-                    Edad: -- días
-                  </span>
-                </div>
-                <input type="date" id="reg-birthdate" class="form-input" required onchange="AuthController.onBirthDateChange(this.value)" oninput="AuthController.onBirthDateChange(this.value)">
-              </div>
-            </div>
-
-            <div class="form-row-2">
-              <div class="form-group">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 4px;">
-                  <label class="form-label" for="reg-weight" style="margin-bottom: 0;">Peso Actual (gramos)</label>
-                  <span style="font-size: 0.74rem; color: #64748B;">1.500 g - 12.000 g</span>
-                </div>
-                <input type="number" id="reg-weight" class="form-input" placeholder="Ej. 3200 (1500 a 12000)" min="1500" max="12000" step="10" required>
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="reg-sex">Sexo</label>
-                <select id="reg-sex" class="form-select">
-                  <option value="Femenino">Femenino</option>
-                  <option value="Masculino">Masculino</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- Consentimiento Informado Obligatorio -->
-            <div class="form-group consent-card" style="margin-top: 14px; padding: 12px 14px; background: #F8FAFC; border: 1px solid #CBD5E1; border-radius: 8px;">
-              <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer; font-size: 0.85rem; color: #334155; line-height: 1.4;">
-                <input type="checkbox" id="reg-consent" required style="margin-top: 2px; width: 18px; height: 18px; accent-color: #0284C7; flex-shrink: 0;">
-                <span>
-                  <strong>Consentimiento Informado:</strong> Acepto el consentimiento informado para el registro asistencial, monitoreo de lactancia y gestión de datos de salud neonatal (Protocolo COIL 202715 • UCAB / PUCE).
-                </span>
-              </label>
-            </div>
-
-            <div class="auth-actions" style="margin-top: 18px;">
-              <button type="submit" class="btn-primary" id="btn-submit-reg" style="width: 100%;">
-                Crear Cuenta y Comenzar
+            <!-- Barra de Progreso / Stepper -->
+            <div class="auth-stepper" id="reg-stepper" role="tablist" aria-label="Pasos de Registro">
+              <button type="button" class="stepper-step active" id="step-btn-1" onclick="AuthController.goToRegStep(1)">
+                <span class="stepper-num">1</span>
+                <span class="stepper-label">Tu Cuenta</span>
               </button>
+              <div class="stepper-line" id="stepper-progress-line"></div>
+              <button type="button" class="stepper-step" id="step-btn-2" onclick="AuthController.goToRegStep(2)">
+                <span class="stepper-num">2</span>
+                <span class="stepper-label">Ficha del Bebé</span>
+              </button>
+            </div>
+
+            <!-- PASO 1: DATOS DEL CUIDADOR / USUARIO -->
+            <div id="reg-step-1" class="reg-step-panel">
+              <div class="step-indicator-heading">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <span>Paso 1 de 2: Acceso del Cuidador o Madre</span>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label" for="reg-fullname">Nombre Completo del Cuidador</label>
+                <input type="text" id="reg-fullname" class="form-input" placeholder="Nombre y Apellido" required autocomplete="name">
+              </div>
+
+              <div class="form-row-2">
+                <div class="form-group">
+                  <label class="form-label" for="reg-email">Correo Electrónico</label>
+                  <input type="email" id="reg-email" class="form-input" placeholder="correo@ejemplo.com" required autocomplete="email">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="reg-password">Contraseña (mín. 6 caracteres)</label>
+                  <div class="password-input-wrapper">
+                    <input type="password" id="reg-password" class="form-input" placeholder="Mínimo 6 caracteres" minlength="6" required autocomplete="new-password">
+                    <button type="button" class="btn-toggle-password" onclick="AuthController.togglePasswordVisibility('reg-password', this)" aria-label="Ver u ocultar contraseña">
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-row-2">
+                <div class="form-group">
+                  <label class="form-label" for="reg-role">Rol del Cuidador</label>
+                  <select id="reg-role" class="form-select">
+                    <option value="Madre_Primeriza">Madre Primeriza</option>
+                    <option value="Monoparental">Monoparental</option>
+                    <option value="Red_Apoyo">Red de Apoyo Familiar</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="reg-phone">Teléfono de Contacto / Emergencia</label>
+                  <input type="tel" id="reg-phone" class="form-input" placeholder="911 o teléfono de cabecera" autocomplete="tel">
+                </div>
+              </div>
+
+              <div class="auth-actions" style="margin-top: 20px;">
+                <button type="button" class="btn-primary" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;" onclick="AuthController.validateAndGoToStep2()">
+                  <span>Continuar a Datos del Bebé</span>
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                </button>
+              </div>
+
+              <div class="auth-switch-prompt">
+                ¿Ya tienes una cuenta registrada? <a href="javascript:void(0)" onclick="AuthController.switchTab('login')">Iniciar Sesión</a>
+              </div>
+            </div>
+
+            <!-- PASO 2: FICHA NEONATAL DEL LACTANTE Y CONSENTIMIENTO -->
+            <div id="reg-step-2" class="reg-step-panel" style="display: none;">
+              <div class="step-indicator-heading">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                <span>Paso 2 de 2: Ficha del Recién Nacido</span>
+              </div>
+
+              <div class="form-row-2">
+                <div class="form-group">
+                  <label class="form-label" for="reg-babyname">Nombre del Bebé</label>
+                  <input type="text" id="reg-babyname" class="form-input" placeholder="Nombre del lactante" required>
+                </div>
+                <div class="form-group">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 4px;">
+                    <label class="form-label" for="reg-birthdate" style="margin-bottom: 0;">Fecha de Nacimiento</label>
+                    <span id="reg-calc-days-hint" class="calc-days-pill">Edad: -- días</span>
+                  </div>
+                  <input type="date" id="reg-birthdate" class="form-input" required onchange="AuthController.onBirthDateChange(this.value)" oninput="AuthController.onBirthDateChange(this.value)">
+                </div>
+              </div>
+
+              <div class="form-row-2">
+                <div class="form-group">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 4px;">
+                    <label class="form-label" for="reg-weight" style="margin-bottom: 0;">Peso Actual (gramos)</label>
+                    <span class="form-hint">1.500 g - 12.000 g</span>
+                  </div>
+                  <input type="number" id="reg-weight" class="form-input" placeholder="Ej. 3200 (1500 a 12000)" min="1500" max="12000" step="10" required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="reg-sex">Sexo</label>
+                  <select id="reg-sex" class="form-select">
+                    <option value="Femenino">Femenino</option>
+                    <option value="Masculino">Masculino</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Consentimiento Informado Obligatorio -->
+              <div class="form-group consent-card">
+                <label class="consent-label">
+                  <input type="checkbox" id="reg-consent" required class="consent-checkbox">
+                  <span>
+                    <strong>Acepto las condiciones:</strong> Doy mi consentimiento para el guardado de datos sobre la alimentación y salud de mi bebé (Iniciativa universitaria COIL 202715 • UCAB / PUCE).
+                  </span>
+                </label>
+              </div>
+
+              <div class="reg-step-actions">
+                <button type="button" class="btn-secondary" onclick="AuthController.goToRegStep(1)">
+                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -1px; margin-right: 4px;"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                  <span>Volver al Paso 1</span>
+                </button>
+                <button type="submit" class="btn-primary" id="btn-submit-reg">
+                  Crear Cuenta y Comenzar ✓
+                </button>
+              </div>
+
+              <div class="auth-switch-prompt">
+                ¿Ya tienes una cuenta registrada? <a href="javascript:void(0)" onclick="AuthController.switchTab('login')">Iniciar Sesión</a>
+              </div>
             </div>
           </form>
 
@@ -220,13 +346,46 @@
       </section>
 
       <!-- ---------------------------------------------------------------------
-           PANTALLA 1: DASHBOARD ASISTENCIAL (FIFO & STOCK)
+           PANTALLA 1: PANEL PRINCIPAL (FRASCOS Y BIENESTAR)
            --------------------------------------------------------------------- -->
       <section id="screen-dashboard" class="app-screen active-screen">
         <div class="hero-header">
-          <span class="hero-tag">Seguimiento Clínico y Logístico</span>
-          <h2 class="hero-title">Lactante: <span class="baby-display-name">---</span></h2>
-          <p class="hero-desc" id="dash-baby-meta">Cargando datos clínicos desde la base de datos...</p>
+          <span class="hero-tag">Cuidado Diario y Alimentación</span>
+          <h2 class="hero-title">Bebé: <span class="baby-display-name">---</span></h2>
+          <p class="hero-desc" id="dash-baby-meta">Cargando datos guardados...</p>
+        </div>
+
+        <!-- Barra de Acciones Rápidas (1 Clic para padres / cuidadores) -->
+        <div class="quick-actions-strip">
+          <button type="button" class="quick-action-pill primary-action" onclick="UIController.switchScreen('screen-extraction')">
+            <span class="qa-icon">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </span>
+            <span class="qa-text">
+              <strong>+ Guardar Extracción</strong>
+              <small>Etiquetar frasco nuevo</small>
+            </span>
+          </button>
+
+          <button type="button" class="quick-action-pill sage-action" onclick="UIController.openDirectIntakeModal()">
+            <span class="qa-icon">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 7h6v2a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2V7z"/><path d="M10 7V5a2 2 0 0 1 4 0v2"/></svg>
+            </span>
+            <span class="qa-text">
+              <strong>Alimentar Ahora</strong>
+              <small>Usar frasco recomendado</small>
+            </span>
+          </button>
+
+          <button type="button" class="quick-action-pill triage-action" onclick="UIController.switchScreen('screen-triage')">
+            <span class="qa-icon">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            </span>
+            <span class="qa-text">
+              <strong>Evaluar Signos</strong>
+              <small>Chequeo neonatal AIEPI</small>
+            </span>
+          </button>
         </div>
 
         <!-- Stock Disponible (ml y oz) -->
@@ -236,7 +395,7 @@
             <div class="stat-label">Stock Total Disponible</div>
             <div style="display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap;">
               <span class="stat-badge badge-refrigerado" id="dash-refri-badge">Refri: 0 ml</span>
-              <span class="stat-badge" id="dash-ambiente-badge" style="display: none; background: #FEF3C7; color: #92400E; border: 1px solid #FCD34D;">Ambiente: 0 ml</span>
+              <span class="stat-badge badge-ambiente" id="dash-ambiente-badge" style="display: none;">Ambiente: 0 ml</span>
             </div>
           </div>
           <div class="stock-stat-box" onclick="UIController.switchScreen('screen-inventory')" style="cursor: pointer;" title="Ver inventario">
@@ -249,14 +408,15 @@
         <!-- Alerta Proactiva (≥48 horas en Refrigerador) -->
         <div id="dash-proactive-alert" style="display: none; margin-bottom: 16px;"></div>
 
-        <!-- Tarjeta del Frasco Prioritario Hoy (FIFO) -->
+        <!-- Tarjeta del Frasco Recomendado Hoy (El más antiguo primero) -->
         <div id="dash-fifo-container">
           <!-- Generado dinámicamente por FIFOEngine -->
         </div>
 
-        <!-- Mosaico Minimalista de Módulos (Grid Hub) -->
+        <!-- Mosaico Organizado por Pasos del Cuidado -->
         <div class="mosaic-section-header">
-          <span class="mosaic-section-title">Módulos del Sistema</span>
+          <span class="mosaic-section-title">1. El Camino de la Leche Materna</span>
+          <span class="mosaic-section-pill">Paso a paso</span>
         </div>
 
         <div class="mosaic-grid">
@@ -267,8 +427,9 @@
               </svg>
             </div>
             <div class="tile-content">
+              <div class="tile-step-kicker">Paso 1 • Guardar</div>
               <div class="tile-title">Nueva Extracción</div>
-              <div class="tile-desc">Registrar volumen (ml/oz), fecha y frío</div>
+              <div class="tile-desc">Registrar volumen (ml/oz), fecha y dónde lo guardas</div>
             </div>
           </div>
 
@@ -281,8 +442,23 @@
               </svg>
             </div>
             <div class="tile-content">
-              <div class="tile-title">Banco de Leche (FIFO)</div>
-              <div class="tile-desc">Control de rotación cronológica de frascos</div>
+              <div class="tile-step-kicker">Paso 2 • Cuidar</div>
+              <div class="tile-title">Banco de Leche</div>
+              <div class="tile-desc">Ver todos tus frascos y usar el más antiguo primero</div>
+            </div>
+          </div>
+
+          <div class="mosaic-tile-card" onclick="UIController.switchScreen('screen-thawing')">
+            <div class="tile-icon-bubble">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+            </div>
+            <div class="tile-content">
+              <div class="tile-step-kicker">Paso 3 • Preparación</div>
+              <div class="tile-title">Temperado Seguro</div>
+              <div class="tile-desc">Protocolo baño maría tibio y timer de 10 min</div>
             </div>
           </div>
 
@@ -296,13 +472,21 @@
               </svg>
             </div>
             <div class="tile-content">
+              <div class="tile-step-kicker">Paso 4 • Trazabilidad</div>
               <div class="tile-title">Historial de Tomas</div>
-              <div class="tile-desc">Registro de dosis, horarios y métodos</div>
+              <div class="tile-desc">Bitácora de dosis administradas y métodos</div>
             </div>
           </div>
+        </div>
 
+        <div class="mosaic-section-header">
+          <span class="mosaic-section-title">2. Vigilancia Clínica y Herramientas Pediátricas</span>
+          <span class="mosaic-section-pill sage">Salud Neonatal</span>
+        </div>
+
+        <div class="mosaic-grid">
           <div class="mosaic-tile-card" onclick="UIController.switchScreen('screen-calculator')">
-            <div class="tile-icon-bubble">
+            <div class="tile-icon-bubble tile-icon-sage">
               <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="4" y="2" width="16" height="20" rx="2"></rect>
                 <line x1="8" y1="6" x2="16" y2="6"></line>
@@ -313,12 +497,12 @@
             </div>
             <div class="tile-content">
               <div class="tile-title">Calculadora Pediátrica</div>
-              <div class="tile-desc">Dosis según peso (150 ml/kg/día)</div>
+              <div class="tile-desc">Dosis según peso (150 ml/kg/día) y conversor</div>
             </div>
           </div>
 
           <div class="mosaic-tile-card" onclick="UIController.switchScreen('screen-calendar')">
-            <div class="tile-icon-bubble">
+            <div class="tile-icon-bubble tile-icon-sage">
               <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
                 <line x1="16" y1="2" x2="16" y2="6"></line>
@@ -328,25 +512,12 @@
             </div>
             <div class="tile-content">
               <div class="tile-title">Calendario Semafórico</div>
-              <div class="tile-desc">Estabilidad térmica en refrigerador y congelador</div>
-            </div>
-          </div>
-
-          <div class="mosaic-tile-card" onclick="UIController.switchScreen('screen-thawing')">
-            <div class="tile-icon-bubble">
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <polyline points="12 6 12 12 16 14"></polyline>
-              </svg>
-            </div>
-            <div class="tile-content">
-              <div class="tile-title">Temperado Seguro</div>
-              <div class="tile-desc">Protocolo baño maría tibio y timer de 10 min</div>
+              <div class="tile-desc">Mapa visual de estabilidad térmica mensual</div>
             </div>
           </div>
 
           <div class="mosaic-tile-card" onclick="UIController.switchScreen('screen-triage')">
-            <div class="tile-icon-bubble" style="color: var(--sem-red);">
+            <div class="tile-icon-bubble" style="color: var(--sem-red); background: var(--sem-red-bg); border-color: var(--sem-red-border);">
               <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
                 <line x1="12" y1="9" x2="12" y2="13"></line>
@@ -354,13 +525,13 @@
               </svg>
             </div>
             <div class="tile-content">
-              <div class="tile-title">Alerta Neonatal</div>
-              <div class="tile-desc">Triaje AIEPI de 4 signos de deshidratación</div>
+              <div class="tile-title">Alerta Neonatal (AIEPI)</div>
+              <div class="tile-desc">Tamizaje de 4 signos de deshidratación aguda</div>
             </div>
           </div>
 
           <div class="mosaic-tile-card" onclick="UIController.switchScreen('screen-profile')">
-            <div class="tile-icon-bubble">
+            <div class="tile-icon-bubble tile-icon-sage">
               <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                 <circle cx="12" cy="7" r="4"></circle>
@@ -368,14 +539,14 @@
             </div>
             <div class="tile-content">
               <div class="tile-title">Perfil y Reportes</div>
-              <div class="tile-desc">Datos del bebé, exportar JSON e imprimir informe</div>
+              <div class="tile-desc">Ficha del bebé, informe pediátrico e identidad</div>
             </div>
           </div>
         </div>
       </section>
 
       <!-- ---------------------------------------------------------------------
-           PANTALLA 2: GESTIÓN DE BANCO DE LECHE (INVENTARIO FIFO COMPLETO)
+           PANTALLA 2: BANCO DE LECHE MATERNA (FRASCOS GUARDADOS)
            --------------------------------------------------------------------- -->
       <section id="screen-inventory" class="app-screen">
         <button class="btn-back-hub" onclick="UIController.switchScreen('screen-dashboard')">
@@ -386,9 +557,9 @@
           <span>Volver al Menú Principal</span>
         </button>
         <div class="hero-header">
-          <span class="hero-tag">Trazabilidad de Cadena de Frío</span>
-          <h2 class="hero-title">Inventario FIFO de Extracciones</h2>
-          <p class="hero-desc">Lotes ordenados por antigüedad biológica (Primero en Entrar, Primero en Salir).</p>
+          <span class="hero-tag">Conservación Segura de Leche</span>
+          <h2 class="hero-title">Frascos de Leche Guardados</h2>
+          <p class="hero-desc">Ordenados por fecha: los más antiguos primero para que no se venzan.</p>
         </div>
 
         <!-- Chips de Filtro -->
@@ -442,7 +613,7 @@
       </section>
 
       <!-- ---------------------------------------------------------------------
-           PANTALLA 3: CAPTURA DE NUEVA EXTRACCIÓN (FORMULARIO FIFO)
+           PANTALLA 3: GUARDAR NUEVA EXTRACCIÓN
            --------------------------------------------------------------------- -->
       <section id="screen-extraction" class="app-screen">
         <button class="btn-back-hub" onclick="UIController.switchScreen('screen-dashboard')">
@@ -453,9 +624,9 @@
           <span>Volver al Menú Principal</span>
         </button>
         <div class="hero-header">
-          <span class="hero-tag">Registro de Extracción Biosegura</span>
-          <h2 class="hero-title">Ingreso de Nuevo Lote</h2>
-          <p class="hero-desc">El lote ingresará automáticamente al final de la cola FIFO para control de caducidad.</p>
+          <span class="hero-tag">Guardar Leche Materna</span>
+          <h2 class="hero-title">Nuevo Frasco Extraído</h2>
+          <p class="hero-desc">Tu frasco se ordenará automáticamente para que sepas con claridad cuál usar primero.</p>
         </div>
 
         <form id="form-new-extraction" onsubmit="UIController.handleSaveExtraction(event)">
@@ -475,11 +646,11 @@
           </div>
 
           <div class="form-group">
-            <label class="form-label">Destino de Almacenamiento Térmico</label>
+            <label class="form-label">¿Dónde guardarás este frasco?</label>
             <select id="ext-sel-temp" class="form-select" onchange="UIController.updateExtractionPreview()">
-              <option value="Ambiente">Ambiente (hasta 4 horas a ≤25 °C)</option>
-              <option value="Refrigerador_4C" selected>Refrigerador 4 °C (hasta 4 días / 96 h)</option>
-              <option value="Congelador_18C">Congelador -18 °C (3 a 6 meses)</option>
+              <option value="Ambiente">A temperatura ambiente (hasta 4 horas)</option>
+              <option value="Refrigerador_4C" selected>En la nevera / refrigerador (hasta 4 días)</option>
+              <option value="Congelador_18C">En el congelador (de 3 a 6 meses)</option>
             </select>
           </div>
 
@@ -489,21 +660,28 @@
           </div>
 
           <div class="form-group">
-            <label class="form-label">Notas Clínicas u Observaciones (Opcional)</label>
-            <textarea id="ext-inp-notes" class="form-textarea" rows="2" placeholder="Ej. Extracción matutina, seno derecho, frasco de vidrio estéril."></textarea>
+            <label class="form-label">Notas o Recordatorios (Opcional)</label>
+            <textarea id="ext-inp-notes" class="form-textarea" rows="2" placeholder="Ej. Extracción de la mañana, pecho derecho."></textarea>
           </div>
 
-          <!-- Preview de Equivalencia y Asignación de Lote -->
-          <div class="equiv-tile" style="margin-bottom: 20px;">
-            <div class="equiv-tile-icon" style="font-weight: 800; font-size: 13px; color: var(--primary);">LOTE</div>
+          <!-- Preview de Equivalencia y Asignación de Frasco -->
+          <div class="equiv-tile extraction-preview-tile" style="margin-bottom: 20px;">
+            <div class="equiv-tile-icon" title="Frasco de Leche">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 6h6v3a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2V6z"/>
+                <path d="M10 6V4a2 2 0 0 1 4 0v2"/>
+                <line x1="10" y1="13" x2="14" y2="13"/>
+                <line x1="10" y1="16" x2="13" y2="16"/>
+              </svg>
+            </div>
             <div class="equiv-tile-body">
-              <div class="equiv-tile-val" id="ext-preview-text">Calculando #Lote FIFO y equivalencias...</div>
-              <div class="equiv-tile-desc">Asignación secuencial de #Lote FIFO con estampa temporal inmutable para etiquetado físico.</div>
+              <div class="equiv-tile-val" id="ext-preview-text">Calculando número de frasco y medidas...</div>
+              <div class="equiv-tile-desc">Asignaremos un número a este frasco y su etiqueta para que lo identifiques fácilmente.</div>
             </div>
           </div>
 
           <button type="submit" class="btn-primary" id="btn-submit-extraction">
-            Guardar Lote e Insertar en Cola FIFO
+            Guardar Frasco en mi Banco de Leche
           </button>
         </form>
       </section>
@@ -520,12 +698,12 @@
           <span>Volver al Menú Principal</span>
         </button>
         <div class="hero-header">
-          <span class="hero-tag">Dosificación Pediátrica</span>
-          <h2 class="hero-title">Calculadora y Conversor Doméstico</h2>
-          <p class="hero-desc">Basado en la regla biomédica internacional de 150 ml/kg/día para lactantes sanos.</p>
+          <span class="hero-tag">Guía de Alimentación</span>
+          <h2 class="hero-title">Calculadora y Medidas en el Hogar</h2>
+          <p class="hero-desc">Basado en la recomendación pediátrica de 150 ml por kilo de peso al día.</p>
         </div>
 
-        <div id="calc-baby-info-chip" style="font-size: 0.82rem; font-weight: 600; color: #1D4ED8; background: #DBEAFE; padding: 6px 12px; border-radius: 6px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+        <div id="calc-baby-info-chip" class="calc-info-banner">
           <span>Lactante: Cargando datos...</span>
         </div>
 
@@ -553,11 +731,19 @@
         </div>
 
         <!-- Equivalencias en Utensilios Domésticos -->
-        <div class="form-label" style="margin-bottom: 8px;">Equivalencias Prácticas para Cuidadores:</div>
+        <div class="form-label" style="margin-bottom: 10px;">Equivalencias Prácticas para Cuidadores:</div>
         
         <div class="equiv-grid">
           <div class="equiv-tile">
-            <div class="equiv-tile-icon" style="font-weight: 700; font-size: 11px;">fl oz</div>
+            <div class="equiv-tile-icon" title="Biberón Graduado">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 7h6v2a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2V7z"/>
+                <path d="M10 7V5a2 2 0 0 1 4 0v2"/>
+                <line x1="12" y1="3" x2="12" y2="2"/>
+                <line x1="10" y1="13" x2="14" y2="13"/>
+                <line x1="10" y1="16" x2="13" y2="16"/>
+              </svg>
+            </div>
             <div class="equiv-tile-body">
               <div class="equiv-tile-val" id="calc-equiv-oz">-- fl oz</div>
               <div class="equiv-tile-desc">Medida estándar en biberones graduados</div>
@@ -565,7 +751,16 @@
           </div>
 
           <div class="equiv-tile">
-            <div class="equiv-tile-icon" style="font-weight: 700; font-size: 11px;">10 ml</div>
+            <div class="equiv-tile-icon" title="Jeringa Dosificadora 10 ml">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m18 2 4 4"/>
+                <path d="m17 7 3-3"/>
+                <path d="M19 9 8.7 19.3c-1 1-2.5 1-3.4 0l-.6-.6c-1-1-1-2.5 0-3.4L15 5"/>
+                <path d="m9 11 4 4"/>
+                <path d="m5 19-3 3"/>
+                <path d="m14 4 6 6"/>
+              </svg>
+            </div>
             <div class="equiv-tile-body">
               <div class="equiv-tile-val" id="calc-equiv-jeringa">-- jeringas</div>
               <div class="equiv-tile-desc">Alimentación con jeringa-dedo para evitar confusión pezón-tetina</div>
@@ -573,10 +768,14 @@
           </div>
 
           <div class="equiv-tile">
-            <div class="equiv-tile-icon" style="font-weight: 700; font-size: 11px;">5 ml</div>
+            <div class="equiv-tile-icon" title="Cucharita Dosificadora 5 ml">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M7 10c0-3.3 2.2-6 5-6s5 2.7 5 6c0 2.6-1.4 4.8-3.5 5.6V21a1.5 1.5 0 0 1-3 0v-5.4C8.4 14.8 7 12.6 7 10Z"/>
+              </svg>
+            </div>
             <div class="equiv-tile-body">
               <div class="equiv-tile-val" id="calc-equiv-cuch">-- cucharaditas</div>
-              <div class="equiv-tile-desc">Cucharitas dosificadoras de puericultura estandarizadas</div>
+              <div class="equiv-tile-desc">Cucharaditas infantiles de 5 ml</div>
             </div>
           </div>
         </div>
@@ -649,7 +848,7 @@
           <p class="hero-desc">Directrices hospitalarias de la OMS y el MSP para proteger las inmunoglobulinas.</p>
         </div>
 
-        <div id="thawing-current-lot-hint" style="display: none; background: #E0F2FE; border-left: 4px solid #0284C7; color: #0369A1; padding: 10px 14px; border-radius: 6px; font-weight: 700; font-size: 13px; margin-bottom: 14px;">
+        <div id="thawing-current-lot-hint" class="thawing-lot-banner" style="display: none;">
           Preparando: Frasco Prioritario
         </div>
 
@@ -665,16 +864,78 @@
           <div class="protocol-step-box danger-prohibition">
             <div class="step-num-bubble">!</div>
             <div class="step-content-box">
-              <h4>PROHIBICIÓN ESTRICTA: Microondas o Fuego Directo</h4>
-              <p>El calentamiento desigual destruye la lactoferrina y los anticuerpos sIgA, además de crear puntos calientes que provocan quemaduras severas en la mucosa oral del bebé.</p>
+              <h4>NUNCA USAR: Microondas o Fuego Directo</h4>
+              <p>El calor desparejo destruye las defensas y nutrientes de la leche materna, y puede quemar la boquita de tu bebé.</p>
             </div>
           </div>
 
           <div class="protocol-step-box">
             <div class="step-num-bubble">3</div>
-            <div class="step-content-box">
+            <div class="step-content-box" style="flex: 1;">
               <h4>Baño María Pasivo Tibio</h4>
               <p>Calentar agua en una olla, <strong>retirarla de la fuente de calor</strong> y sumergir el recipiente de leche durante 10 a 12 minutos para atemperarlo suavemente.</p>
+              
+              <!-- Desplegable comparativo fotográfico -->
+              <div class="clinical-ref-wrapper">
+                <button type="button" class="btn-toggle-clinical-ref" onclick="UIController.togglePhotoRef('ref-thaw-procedure', this)" aria-expanded="false">
+                  <span class="ref-btn-left">
+                    <svg class="ref-camera-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                      <circle cx="12" cy="13" r="4"></circle>
+                    </svg>
+                    <span>Ver fotos de referencia del procedimiento</span>
+                  </span>
+                  <span class="ref-btn-arrow">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                  </span>
+                </button>
+
+                <div id="ref-thaw-procedure" class="clinical-photo-accordion">
+                  <div class="clinical-comparison-grid">
+                    <!-- Correcto: Baño maría pasivo -->
+                    <div class="clinical-photo-card normal-state" onclick="UIController.openPhotoModal('Técnica Biosegura: Baño María Pasivo', 'thaw-correct')">
+                      <div class="clinical-photo-container">
+                        <img class="clinical-photo-img" src="assets/images/thaw_waterbath.jpg" alt="Baño maría pasivo con agua tibia" loading="lazy" onerror="this.style.display='none'">
+                        <div class="clinical-svg-placeholder">
+                          <svg viewBox="0 0 64 64" width="48" height="48" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="10" y="24" width="44" height="28" rx="6" fill="var(--secondary-subtle)" stroke="var(--secondary)"/>
+                            <path d="M6 24h52" stroke="var(--secondary)" stroke-width="2.5" stroke-linecap="round"/>
+                            <path d="M26 14h12v10a2 2 0 0 1-2 2h-8a2 2 0 0 1-2-2V14z" fill="var(--bg-card)" stroke="var(--primary)"/>
+                            <path d="M16 38c4-2 8-2 12 0s8 2 12 0 8-2 12 0" stroke="var(--secondary)" stroke-width="2" stroke-linecap="round"/>
+                            <circle cx="48" cy="14" r="5" fill="var(--sem-green-bg)" stroke="var(--sem-green)"/>
+                            <path d="M46 14l1.5 1.5 3-3" stroke="var(--sem-green)" stroke-width="1.8" stroke-linecap="round"/>
+                          </svg>
+                          <span class="placeholder-overlay-hint">Toca para ampliar</span>
+                        </div>
+                        <span class="photo-state-badge badge-normal">Técnica Correcta</span>
+                      </div>
+                      <div class="photo-caption-title">Olla fuera del fuego (Agua tibia ~40 °C)</div>
+                      <div class="photo-caption-desc">Recipiente sumergido pasivamente sin hervor para no alterar las proteínas ni enzimas.</div>
+                    </div>
+
+                    <!-- Incorrecto: Microondas / Fuego -->
+                    <div class="clinical-photo-card alert-state" onclick="UIController.openPhotoModal('Peligro Crítico: Microondas o Ebullición Directa', 'thaw-danger')">
+                      <div class="clinical-photo-container">
+                        <img class="clinical-photo-img" src="assets/images/thaw_microwave_danger.jpg" alt="Peligro de calentar leche en microondas" loading="lazy" onerror="this.style.display='none'">
+                        <div class="clinical-svg-placeholder">
+                          <svg viewBox="0 0 64 64" width="48" height="48" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="8" y="16" width="48" height="34" rx="4" fill="var(--sem-red-bg)" stroke="var(--sem-red)"/>
+                            <rect x="14" y="22" width="26" height="22" rx="2" fill="var(--bg-card)" stroke="var(--sem-red)"/>
+                            <circle cx="48" cy="24" r="2.5" fill="var(--sem-red)"/>
+                            <circle cx="48" cy="32" r="2.5" fill="var(--sem-red)"/>
+                            <line x1="8" y1="50" x2="56" y2="16" stroke="var(--sem-red)" stroke-width="3"/>
+                          </svg>
+                          <span class="placeholder-overlay-hint">Toca para ampliar</span>
+                        </div>
+                        <span class="photo-state-badge badge-alert">Prohibido</span>
+                      </div>
+                      <div class="photo-caption-title">Calor irregular y quemaduras</div>
+                      <div class="photo-caption-desc">Genera puntos calientes invisibles que queman la boca del bebé y destruyen los anticuerpos.</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
             </div>
           </div>
 
@@ -689,8 +950,9 @@
 
         <!-- Temporizador Interactivo de Baño María Pasivo -->
         <div class="timer-interactive-card">
-          <div style="font-size: 13px; font-weight: 700; color: var(--neutral-600); text-transform: uppercase;">
-            Temporizador de Baño María Pasivo (10 min)
+          <div class="timer-card-badge">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span>Temporizador de Baño María Pasivo (10 min)</span>
           </div>
           <div class="timer-digits" id="timer-display">10:00</div>
           <div class="timer-controls-row">
@@ -731,18 +993,83 @@
               <span class="triage-card-title">Fontanela Anterior (Mollera Superior)</span>
             </div>
             <div class="triage-illustration-box">
-              <div class="triage-svg-preview">1</div>
+              <div class="triage-svg-preview" aria-hidden="true">
+                <svg viewBox="0 0 44 44" width="32" height="32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="22" cy="24" r="13" fill="var(--primary-subtle)" stroke="var(--primary)" stroke-width="2"/>
+                  <path d="M13 15C16.5 17.8 27.5 17.8 31 15" stroke="var(--primary-hover)" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="2.5 2.5"/>
+                  <path d="M22 6V12M19 9.5L22 12.5L25 9.5" stroke="var(--secondary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <circle cx="17.5" cy="24" r="1.4" fill="var(--primary)"/>
+                  <circle cx="26.5" cy="24" r="1.4" fill="var(--primary)"/>
+                  <path d="M19.5 29C20.5 30.2 23.5 30.2 24.5 29" stroke="var(--primary)" stroke-width="1.8" stroke-linecap="round"/>
+                </svg>
+              </div>
               <div class="triage-illus-desc">Palpar suavemente la parte superior de la cabeza del lactante mientras se encuentra erguido y en calma.</div>
             </div>
+
+            <!-- Desplegable comparativo fotográfico Fontanela -->
+            <div class="clinical-ref-wrapper">
+              <button type="button" class="btn-toggle-clinical-ref" onclick="UIController.togglePhotoRef('ref-triage-fontanela', this)" aria-expanded="false">
+                <span class="ref-btn-left">
+                  <svg class="ref-camera-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                    <circle cx="12" cy="13" r="4"></circle>
+                  </svg>
+                  <span>Ver fotos de referencia clínica (Normal vs. Alarma)</span>
+                </span>
+                <span class="ref-btn-arrow">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                </span>
+              </button>
+
+              <div id="ref-triage-fontanela" class="clinical-photo-accordion">
+                <div class="clinical-comparison-grid">
+                  <div class="clinical-photo-card normal-state" onclick="UIController.openPhotoModal('Fontanela: Estado Normal', 'fontanela-normal')">
+                    <div class="clinical-photo-container">
+                      <img class="clinical-photo-img" src="assets/images/fontanela_normal.jpg" alt="Fontanela anterior normal plana" loading="lazy" onerror="this.style.display='none'">
+                      <div class="clinical-svg-placeholder">
+                        <svg viewBox="0 0 64 64" width="46" height="46" fill="none" stroke="currentColor" stroke-width="2">
+                          <circle cx="32" cy="34" r="20" fill="var(--bg-card)" stroke="var(--primary)"/>
+                          <path d="M20 22c6 3 18 3 24 0" stroke="var(--sem-green)" stroke-width="2.5" stroke-linecap="round"/>
+                          <circle cx="48" cy="16" r="5" fill="var(--sem-green-bg)" stroke="var(--sem-green)"/>
+                          <path d="M46 16l1.5 1.5 3-3" stroke="var(--sem-green)" stroke-width="1.8" stroke-linecap="round"/>
+                        </svg>
+                        <span class="placeholder-overlay-hint">Toca para ampliar</span>
+                      </div>
+                      <span class="photo-state-badge badge-normal">Normal</span>
+                    </div>
+                    <div class="photo-caption-title">Plana y firme al tacto</div>
+                    <div class="photo-caption-desc">Al nivel del cráneo. Puede sentirse un suave latido arterial que es fisiológico.</div>
+                  </div>
+
+                  <div class="clinical-photo-card alert-state" onclick="UIController.openPhotoModal('Fontanela: Signo de Alarma', 'fontanela-alert')">
+                    <div class="clinical-photo-container">
+                      <img class="clinical-photo-img" src="assets/images/fontanela_hundida.jpg" alt="Fontanela anterior deprimida por deshidratación" loading="lazy" onerror="this.style.display='none'">
+                      <div class="clinical-svg-placeholder">
+                        <svg viewBox="0 0 64 64" width="46" height="46" fill="none" stroke="currentColor" stroke-width="2">
+                          <circle cx="32" cy="34" r="20" fill="var(--bg-card)" stroke="var(--primary)"/>
+                          <path d="M20 18c4 8 20 8 24 0" stroke="var(--sem-red)" stroke-width="2.5" stroke-linecap="round"/>
+                          <path d="M32 10v10m-3-3l3 3 3-3" stroke="var(--sem-red)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <span class="placeholder-overlay-hint">Toca para ampliar</span>
+                      </div>
+                      <span class="photo-state-badge badge-alert">Alarma AIEPI</span>
+                    </div>
+                    <div class="photo-caption-title">Hundida / Deprimida</div>
+                    <div class="photo-caption-desc">Forma una hendidura o pozo perceptible. Indica descenso del volumen de fluidos corporales.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div class="triage-buttons-group">
               <button type="button" class="triage-option-btn selected-normal" onclick="UIController.setTriageAnswer('fontanela', 'normal', this)">
-                <strong>Opción A (Normal):</strong> Plana, normotensa, pulso sutil suave.
+                <strong>Opción A (Normal):</strong> Plana, suave y normal al tacto.
               </button>
               <button type="button" class="triage-option-btn" onclick="UIController.setTriageAnswer('fontanela', 'alert', this)">
-                <strong>Opción B (Alerta Temprana):</strong> Leve concavidad por debajo de bordes óseos.
+                <strong>Opción B (Alerta Temprana):</strong> Ligeramente hundida.
               </button>
               <button type="button" class="triage-option-btn" onclick="UIController.setTriageAnswer('fontanela', 'danger', this)">
-                <strong>Opción C (Emergencia):</strong> Depresión profunda en copa (&gt; 3 mm de hendidura).
+                <strong>Opción C (Emergencia):</strong> Muy hundida o con hueco marcado.
               </button>
             </div>
           </div>
@@ -751,58 +1078,247 @@
           <div class="triage-card">
             <div class="triage-card-header">
               <span class="triage-card-badge">2</span>
-              <span class="triage-card-title">Mucosas Orales y Presencia de Saliva</span>
+              <span class="triage-card-title">Boquita, Labios y Saliva</span>
             </div>
             <div class="triage-illustration-box">
-              <div class="triage-svg-preview">2</div>
-              <div class="triage-illus-desc">Examinar los labios, encías y lengua del bebé con iluminación adecuada.</div>
+              <div class="triage-svg-preview" aria-hidden="true">
+                <svg viewBox="0 0 44 44" width="32" height="32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M8 22C11.5 16.5 16.5 16.5 22 19C27.5 16.5 32.5 16.5 36 22C32 29.5 26.5 32 22 32C17.5 32 12 29.5 8 22Z" fill="var(--primary-subtle)" stroke="var(--primary)" stroke-width="2" stroke-linejoin="round"/>
+                  <path d="M10 22C15.5 24 28.5 24 34 22" stroke="var(--primary)" stroke-width="1.8" stroke-linecap="round"/>
+                  <path d="M33 27C33 27 29.8 31.2 29.8 33.4C29.8 35.1 31.2 36.5 33 36.5C34.8 36.5 36.2 35.1 36.2 33.4C36.2 31.2 33 27 33 27Z" fill="var(--secondary-subtle)" stroke="var(--secondary)" stroke-width="1.8"/>
+                </svg>
+              </div>
+              <div class="triage-illus-desc">Observar los labios, encías y lengua del bebé con buena luz.</div>
             </div>
+
+            <!-- Desplegable comparativo fotográfico Mucosas -->
+            <div class="clinical-ref-wrapper">
+              <button type="button" class="btn-toggle-clinical-ref" onclick="UIController.togglePhotoRef('ref-triage-mucosas', this)" aria-expanded="false">
+                <span class="ref-btn-left">
+                  <svg class="ref-camera-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                    <circle cx="12" cy="13" r="4"></circle>
+                  </svg>
+                  <span>Ver fotos de referencia clínica (Normal vs. Alarma)</span>
+                </span>
+                <span class="ref-btn-arrow">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                </span>
+              </button>
+
+              <div id="ref-triage-mucosas" class="clinical-photo-accordion">
+                <div class="clinical-comparison-grid">
+                  <div class="clinical-photo-card normal-state" onclick="UIController.openPhotoModal('Mucosas Orales: Estado Normal', 'mucosas-normal')">
+                    <div class="clinical-photo-container">
+                      <img class="clinical-photo-img" src="assets/images/mucosas_normales.jpg" alt="Labios y boca húmedos con saliva" loading="lazy" onerror="this.style.display='none'">
+                      <div class="clinical-svg-placeholder">
+                        <svg viewBox="0 0 64 64" width="46" height="46" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M12 32c5-8 12-8 20-4s15-4 20 4c-6 10-14 14-20 14s-14-4-20-14z" fill="var(--bg-card)" stroke="var(--primary)"/>
+                          <circle cx="46" cy="42" r="6" fill="var(--secondary-subtle)" stroke="var(--secondary)"/>
+                          <circle cx="48" cy="16" r="5" fill="var(--sem-green-bg)" stroke="var(--sem-green)"/>
+                          <path d="M46 16l1.5 1.5 3-3" stroke="var(--sem-green)" stroke-width="1.8" stroke-linecap="round"/>
+                        </svg>
+                        <span class="placeholder-overlay-hint">Toca para ampliar</span>
+                      </div>
+                      <span class="photo-state-badge badge-normal">Normal</span>
+                    </div>
+                    <div class="photo-caption-title">Brillantes y con saliva líquida</div>
+                    <div class="photo-caption-desc">Lengua y encías rosadas con película húmeda brillante y saliva transparente.</div>
+                  </div>
+
+                  <div class="clinical-photo-card alert-state" onclick="UIController.openPhotoModal('Mucosas Orales: Signo de Alarma', 'mucosas-alert')">
+                    <div class="clinical-photo-container">
+                      <img class="clinical-photo-img" src="assets/images/mucosas_secas.jpg" alt="Boca seca con saliva espesa o pegajosa" loading="lazy" onerror="this.style.display='none'">
+                      <div class="clinical-svg-placeholder">
+                        <svg viewBox="0 0 64 64" width="46" height="46" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M12 34c5-6 12-6 20-3s15-3 20 3c-6 8-14 10-20 10s-14-2-20-10z" fill="var(--bg-card)" stroke="var(--sem-red)"/>
+                          <line x1="22" y1="28" x2="22" y2="40" stroke="var(--sem-red)" stroke-width="1.8" stroke-linecap="round"/>
+                          <line x1="32" y1="28" x2="32" y2="41" stroke="var(--sem-red)" stroke-width="1.8" stroke-linecap="round"/>
+                          <line x1="42" y1="28" x2="42" y2="40" stroke="var(--sem-red)" stroke-width="1.8" stroke-linecap="round"/>
+                        </svg>
+                        <span class="placeholder-overlay-hint">Toca para ampliar</span>
+                      </div>
+                      <span class="photo-state-badge badge-alert">Alarma AIEPI</span>
+                    </div>
+                    <div class="photo-caption-title">Secos, agrietados o pegajosos</div>
+                    <div class="photo-caption-desc">Saliva filamentosa o ausencia total de humedad en la lengua y comisuras labiales.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div class="triage-buttons-group">
               <button type="button" class="triage-option-btn selected-normal" onclick="UIController.setTriageAnswer('mucosas', 'normal', this)">
-                <strong>Opción A (Normal):</strong> Labios rosados húmedos y saliva fluida abundante.
+                <strong>Opción A (Normal):</strong> Labios rosados, húmedos y con saliva fluida.
               </button>
               <button type="button" class="triage-option-btn" onclick="UIController.setTriageAnswer('mucosas', 'alert', this)">
-                <strong>Opción B (Alerta Temprana):</strong> Labios pegajosos, saliva escasa o espesa.
+                <strong>Opción B (Alerta Temprana):</strong> Labios pegajosos, saliva espesa o poca saliva.
               </button>
               <button type="button" class="triage-option-btn" onclick="UIController.setTriageAnswer('mucosas', 'danger', this)">
-                <strong>Opción C (Emergencia):</strong> Totalmente secas, lengua áspera y cuarteada sin saliva.
+                <strong>Opción C (Emergencia):</strong> Boquita totalmente seca, lengua sin saliva.
               </button>
             </div>
           </div>
 
-          <!-- Tarjeta 3: Signo del Pliegue -->
+          <!-- Tarjeta 3: Elasticidad de la Piel -->
           <div class="triage-card">
             <div class="triage-card-header">
               <span class="triage-card-badge">3</span>
-              <span class="triage-card-title">Turgencia Cutánea (Signo del Pliegue)</span>
+              <span class="triage-card-title">Elasticidad de la Piel (Pellizco Suave)</span>
             </div>
             <div class="triage-illustration-box">
-              <div class="triage-svg-preview">3</div>
-              <div class="triage-illus-desc">Pellizcar suavemente la piel del abdomen o cara anterior del muslo y soltar.</div>
+              <div class="triage-svg-preview" aria-hidden="true">
+                <svg viewBox="0 0 44 44" width="32" height="32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M7 31H15C17.5 31 19 20 22 20C25 20 26.5 31 29 31H37" stroke="var(--primary)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M15 31C17.5 31 19 20 22 20C25 20 26.5 31 29 31H15Z" fill="var(--primary-subtle)"/>
+                  <path d="M22 9V16M19 12L22 9L25 12" stroke="var(--secondary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <div class="triage-illus-desc">Pellizcar con suavidad la piel de la pancita o del muslo y soltar.</div>
             </div>
+
+            <!-- Desplegable comparativo fotográfico Pliegue -->
+            <div class="clinical-ref-wrapper">
+              <button type="button" class="btn-toggle-clinical-ref" onclick="UIController.togglePhotoRef('ref-triage-pliegue', this)" aria-expanded="false">
+                <span class="ref-btn-left">
+                  <svg class="ref-camera-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                    <circle cx="12" cy="13" r="4"></circle>
+                  </svg>
+                  <span>Ver fotos de referencia clínica (Normal vs. Alarma)</span>
+                </span>
+                <span class="ref-btn-arrow">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                </span>
+              </button>
+
+              <div id="ref-triage-pliegue" class="clinical-photo-accordion">
+                <div class="clinical-comparison-grid">
+                  <div class="clinical-photo-card normal-state" onclick="UIController.openPhotoModal('Elasticidad Cutánea: Estado Normal', 'pliegue-normal')">
+                    <div class="clinical-photo-container">
+                      <img class="clinical-photo-img" src="assets/images/pliegue_normal.jpg" alt="Retorno elástico normal de la piel menor a un segundo" loading="lazy" onerror="this.style.display='none'">
+                      <div class="clinical-svg-placeholder">
+                        <svg viewBox="0 0 64 64" width="46" height="46" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M10 40h44" stroke="var(--sem-green)" stroke-width="3" stroke-linecap="round"/>
+                          <path d="M24 40c4-10 12-10 16 0" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round"/>
+                          <circle cx="48" cy="16" r="5" fill="var(--sem-green-bg)" stroke="var(--sem-green)"/>
+                          <path d="M46 16l1.5 1.5 3-3" stroke="var(--sem-green)" stroke-width="1.8" stroke-linecap="round"/>
+                        </svg>
+                        <span class="placeholder-overlay-hint">Toca para ampliar</span>
+                      </div>
+                      <span class="photo-state-badge badge-normal">Normal</span>
+                    </div>
+                    <div class="photo-caption-title">Retorno inmediato (&lt; 1 seg)</div>
+                    <div class="photo-caption-desc">Al soltar el pellizco en abdomen, la piel se alisa instantáneamente sin dejar marca.</div>
+                  </div>
+
+                  <div class="clinical-photo-card alert-state" onclick="UIController.openPhotoModal('Elasticidad Cutánea: Signo de Alarma', 'pliegue-alert')">
+                    <div class="clinical-photo-container">
+                      <img class="clinical-photo-img" src="assets/images/pliegue_persistente.jpg" alt="Signo del pliegue cutáneo que tarda más de dos segundos en regresar" loading="lazy" onerror="this.style.display='none'">
+                      <div class="clinical-svg-placeholder">
+                        <svg viewBox="0 0 64 64" width="46" height="46" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M10 42h16c3 0 4-18 6-18s3 18 6 18h16" stroke="var(--sem-red)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                          <circle cx="32" cy="14" r="5" fill="var(--sem-red-bg)" stroke="var(--sem-red)"/>
+                          <text x="32" y="17" text-anchor="middle" font-size="9" font-weight="bold" fill="var(--sem-red)" stroke="none">!</text>
+                        </svg>
+                        <span class="placeholder-overlay-hint">Toca para ampliar</span>
+                      </div>
+                      <span class="photo-state-badge badge-alert">Alarma AIEPI</span>
+                    </div>
+                    <div class="photo-caption-title">Pliegue persistente (&gt; 2 seg)</div>
+                    <div class="photo-caption-desc">La piel queda levantada formando una tienda de campaña. Alarma crítica de deshidratación.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div class="triage-buttons-group">
               <button type="button" class="triage-option-btn selected-normal" onclick="UIController.setTriageAnswer('pliegue', 'normal', this)">
-                <strong>Opción A (Normal):</strong> Retorno inmediato en menos de 1 segundo.
+                <strong>Opción A (Normal):</strong> La piel vuelve a su lugar de inmediato (menos de 1 segundo).
               </button>
               <button type="button" class="triage-option-btn" onclick="UIController.setTriageAnswer('pliegue', 'alert', this)">
-                <strong>Opción B (Alerta Temprana):</strong> Retorno lento entre 1 y 2 segundos.
+                <strong>Opción B (Alerta Temprana):</strong> La piel tarda un poco en regresar (1 a 2 segundos).
               </button>
               <button type="button" class="triage-option-btn" onclick="UIController.setTriageAnswer('pliegue', 'danger', this)">
-                <strong>Opción C (Emergencia):</strong> Muy lento (&gt; 2 s, pliegue en tienda de campaña).
+                <strong>Opción C (Emergencia):</strong> La piel queda levantada o tarda más de 2 segundos.
               </button>
             </div>
           </div>
 
-          <!-- Tarjeta 4: Enoftalmos y Lágrimas -->
+          <!-- Tarjeta 4: Ojitos y Lágrimas -->
           <div class="triage-card">
             <div class="triage-card-header">
               <span class="triage-card-badge">4</span>
-              <span class="triage-card-title">Globos Oculares y Presencia de Lágrimas</span>
+              <span class="triage-card-title">Ojitos y Presencia de Lágrimas</span>
             </div>
             <div class="triage-illustration-box">
-              <div class="triage-svg-preview">4</div>
+              <div class="triage-svg-preview" aria-hidden="true">
+                <svg viewBox="0 0 44 44" width="32" height="32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M6 21C10 14 16 12 22 12C28 12 34 14 38 21C34 28 28 30 22 30C16 30 10 28 6 21Z" fill="var(--primary-subtle)" stroke="var(--primary)" stroke-width="2" stroke-linejoin="round"/>
+                  <circle cx="22" cy="21" r="4.5" fill="var(--primary)"/>
+                  <circle cx="23.5" cy="19.5" r="1.3" fill="#FFFFFF"/>
+                  <path d="M31 28C31 28 27.8 32.2 27.8 34.4C27.8 36.1 29.2 37.5 31 37.5C32.8 37.5 34.2 36.1 34.2 34.4C34.2 32.2 31 28 31 28Z" fill="var(--secondary-subtle)" stroke="var(--secondary)" stroke-width="1.8"/>
+                </svg>
+              </div>
               <div class="triage-illus-desc">Observar la expresión facial y la presencia de lágrimas visibles durante el llanto.</div>
             </div>
+
+            <!-- Desplegable comparativo fotográfico Ojos -->
+            <div class="clinical-ref-wrapper">
+              <button type="button" class="btn-toggle-clinical-ref" onclick="UIController.togglePhotoRef('ref-triage-ojos', this)" aria-expanded="false">
+                <span class="ref-btn-left">
+                  <svg class="ref-camera-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                    <circle cx="12" cy="13" r="4"></circle>
+                  </svg>
+                  <span>Ver fotos de referencia clínica (Normal vs. Alarma)</span>
+                </span>
+                <span class="ref-btn-arrow">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                </span>
+              </button>
+
+              <div id="ref-triage-ojos" class="clinical-photo-accordion">
+                <div class="clinical-comparison-grid">
+                  <div class="clinical-photo-card normal-state" onclick="UIController.openPhotoModal('Mirada y Lágrimas: Estado Normal', 'ojos-normal')">
+                    <div class="clinical-photo-container">
+                      <img class="clinical-photo-img" src="assets/images/ojos_normales.jpg" alt="Ojos brillantes con lágrimas visibles al llorar" loading="lazy" onerror="this.style.display='none'">
+                      <div class="clinical-svg-placeholder">
+                        <svg viewBox="0 0 64 64" width="46" height="46" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M10 32c8-10 14-12 22-12s14 2 22 12c-8 10-14 12-22 12s-14-2-22-12z" fill="var(--bg-card)" stroke="var(--primary)"/>
+                          <circle cx="32" cy="32" r="6" fill="var(--primary)"/>
+                          <circle cx="34" cy="30" r="2" fill="#fff"/>
+                          <path d="M44 40c0 3-2 5-4 5s-4-2-4-5 4-8 4-8 4 5 4 8z" fill="var(--secondary-subtle)" stroke="var(--secondary)"/>
+                        </svg>
+                        <span class="placeholder-overlay-hint">Toca para ampliar</span>
+                      </div>
+                      <span class="photo-state-badge badge-normal">Normal</span>
+                    </div>
+                    <div class="photo-caption-title">Brillantes con lágrimas fluidas</div>
+                    <div class="photo-caption-desc">Ojos vivos y expresivos que producen lágrimas claras cuando el bebé llora o bosteza.</div>
+                  </div>
+
+                  <div class="clinical-photo-card alert-state" onclick="UIController.openPhotoModal('Mirada y Lágrimas: Signo de Alarma', 'ojos-alert')">
+                    <div class="clinical-photo-container">
+                      <img class="clinical-photo-img" src="assets/images/ojos_hundidos.jpg" alt="Cuencas hundidas con llanto sin lágrimas" loading="lazy" onerror="this.style.display='none'">
+                      <div class="clinical-svg-placeholder">
+                        <svg viewBox="0 0 64 64" width="46" height="46" fill="none" stroke="currentColor" stroke-width="2">
+                          <circle cx="32" cy="32" r="16" fill="var(--bg-subtle)" stroke="var(--sem-red)" stroke-dasharray="3 3"/>
+                          <path d="M16 32c5-4 10-5 16-5s11 1 16 5c-5 4-10 5-16 5s-11-1-16-5z" fill="var(--bg-card)" stroke="var(--sem-red)"/>
+                          <circle cx="32" cy="32" r="4.5" fill="var(--sem-red)"/>
+                          <path d="M20 46c4 3 20 3 24 0" stroke="var(--neutral-400)" stroke-width="1.8" stroke-linecap="round"/>
+                        </svg>
+                        <span class="placeholder-overlay-hint">Toca para ampliar</span>
+                      </div>
+                      <span class="photo-state-badge badge-alert">Alarma AIEPI</span>
+                    </div>
+                    <div class="photo-caption-title">Cuencas hundidas sin lágrimas</div>
+                    <div class="photo-caption-desc">Ojeras oscuras marcadas, ojos retraídos hacia adentro y llanto seco sin producir lágrimas.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div class="triage-buttons-group">
               <button type="button" class="triage-option-btn selected-normal" onclick="UIController.setTriageAnswer('ojos', 'normal', this)">
                 <strong>Opción A (Normal):</strong> Ojos vivos y brillantes con lágrimas claras al llorar.
@@ -834,21 +1350,28 @@
            PANTALLA 8: PERFIL, CONFIGURACIÓN Y REPORTES PEDIÁTRICOS
            --------------------------------------------------------------------- -->
       <section id="screen-profile" class="app-screen">
-        <div class="hero-header" style="background: linear-gradient(135deg, #334155 0%, #1E293B 100%);">
-          <span class="hero-tag">Gestión del Sistema y Base de Datos</span>
+        <button class="btn-back-hub" onclick="UIController.switchScreen('screen-dashboard')">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+          <span>Volver al Menú Principal</span>
+        </button>
+        <div class="hero-header">
+          <span class="hero-tag">Ajustes y Datos Guardados</span>
           <h2 class="hero-title">Configuración y Reportes</h2>
-          <p class="hero-desc">Herramientas asistenciales, base de datos relacional y exportación clínica.</p>
+          <p class="hero-desc">Información del bebé, guardado seguro en tu dispositivo y reporte para imprimir.</p>
         </div>
 
         <!-- Estado de Conexión con Base de Datos -->
-        <div style="background: #FFFFFF; border: 1px solid var(--neutral-200); border-radius: var(--radius-md); padding: 16px; margin-bottom: 20px;">
+        <div class="db-connection-card">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 6px;">
-            <strong style="font-size: 13.5px; color: var(--neutral-800);">Motor de Base de Datos y Sesión</strong>
-            <span id="profile-db-status" class="db-status-badge online">● SQLite 3FN Conectado</span>
+            <strong style="font-size: 13.5px; color: var(--neutral-800);">Estado del Guardado y Cuenta</strong>
+            <span id="profile-db-status" class="db-status-badge online">● Datos Protegidos y Guardados</span>
           </div>
           <div style="font-size: 12.5px; color: var(--neutral-600); line-height: 1.5;">
-            <div><strong>Usuario Activo:</strong> <span id="prof-user-email">---</span></div>
-            <div><strong>ID Asistencial:</strong> #<span id="prof-user-id">--</span> • <strong>Arquitectura:</strong> Servidor Web Go + SQLite 3FN</div>
+            <div><strong>Cuenta Activa:</strong> <span id="prof-user-email">---</span></div>
+            <div><strong>ID de Familia:</strong> #<span id="prof-user-id">--</span> • <strong>Almacenamiento:</strong> Guardado automático seguro</div>
           </div>
         </div>
 
@@ -887,14 +1410,26 @@
           <input type="text" class="form-input" placeholder="911" id="prof-inp-phone">
         </div>
 
-        <div style="margin-top: 14px;">
-          <button class="btn-primary" onclick="UIController.saveProfileToBackend()" style="width: 100%;">
-            Guardar Cambios en Base de Datos
-          </button>
+        <!-- Selector de Paleta / Identidad de Género y Rol -->
+        <div class="form-group" style="margin-top: 18px; padding: 14px; background: var(--bg-subtle); border: 1px solid var(--neutral-300); border-radius: var(--radius-sm);">
+          <label class="form-label" style="margin-bottom: 8px;">
+            <span>Paleta de Color e Identidad Visual</span>
+            <span class="form-hint">Maternal / Paternidad</span>
+          </label>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button type="button" class="btn-secondary" style="flex: 1; padding: 8px 12px; font-size: 12px; display: flex; align-items: center; justify-content: center; gap: 6px;" onclick="UIController.applyColorScheme('default'); localStorage.setItem('wawaweb_color_scheme', 'default'); UIController.showToast('Paleta Rosa Maternal activada');">
+              <span style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: #C86870;"></span>
+              <span>Rosa Maternal</span>
+            </button>
+            <button type="button" class="btn-secondary" style="flex: 1; padding: 8px 12px; font-size: 12px; display: flex; align-items: center; justify-content: center; gap: 6px;" onclick="UIController.applyColorScheme('blue'); localStorage.setItem('wawaweb_color_scheme', 'blue'); UIController.showToast('Paleta Azul Paternidad activada');">
+              <span style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: #2B6CB0;"></span>
+              <span>Azul Paternidad</span>
+            </button>
+          </div>
         </div>
 
         <div style="margin-top: 18px; margin-bottom: 24px;">
-          <button class="btn-primary" onclick="UIController.saveProfileSettings()">
+          <button class="btn-primary" onclick="UIController.saveProfileToBackend()" style="width: 100%;">
             Guardar y Actualizar Perfil Clínico
           </button>
         </div>
@@ -912,8 +1447,13 @@
             Exportar Respaldo Local (JSON)
           </button>
 
-          <button class="btn-secondary" style="color: #991B1B; border-color: #FECACA;" onclick="AuthController.logout()">
-            Cerrar Sesión Actual
+          <button class="btn-logout-danger" onclick="AuthController.logout()">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 6px;">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+            <span>Cerrar Sesión Actual</span>
           </button>
         </div>
       </section>
@@ -927,19 +1467,22 @@
   <div id="consume-modal" class="modal-backdrop">
     <div class="modal-dialog">
       <div class="modal-header">
-        <div class="modal-title">Despacho de Frasco (FIFO)</div>
-        <button class="btn-close-modal" onclick="UIController.closeConsumeModal()">X</button>
+        <div class="modal-title">Servir Frasco de Leche</div>
+        <button class="btn-close-modal" onclick="UIController.closeConsumeModal()">✕</button>
       </div>
 
       <input type="hidden" id="modal-consume-lote-id">
       
       <p style="font-size: 13px; color: var(--neutral-600); margin-bottom: 12px;">
-        Vas a suministrar el <strong id="modal-consume-lotename">LOTE</strong> según el orden de rotación FIFO.
+        Vas a servir el <strong id="modal-consume-lotename">LOTE</strong> (usando el frasco que se guardó primero).
       </p>
 
-      <div style="margin-bottom: 14px; padding: 10px 12px; background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 8px; font-size: 12.5px; color: #166534; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-        <span>🌡️ ¿Deseas temperar el frasco primero?</span>
-        <button type="button" class="btn-secondary" style="font-size: 11.5px; padding: 4px 10px; background: white;" onclick="UIController.goToThawingFromModal()">Abrir Temporizador (10 min)</button>
+      <div class="modal-thaw-callout">
+        <span style="display: inline-flex; align-items: center; gap: 6px;">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z"/></svg>
+          ¿Deseas temperar el frasco primero?
+        </span>
+        <button type="button" class="btn-secondary" style="width: auto; font-size: 11.5px; padding: 5px 12px;" onclick="UIController.goToThawingFromModal()">Abrir Temporizador (10 min)</button>
       </div>
 
       <div class="form-group">
@@ -963,7 +1506,7 @@
       </div>
 
       <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
-        <input type="checkbox" id="modal-consume-temp-check" checked style="width: 18px; height: 18px;">
+        <input type="checkbox" id="modal-consume-temp-check" checked style="width: 18px; height: 18px; accent-color: var(--primary);">
         <label for="modal-consume-temp-check" style="font-size: 12.5px; font-weight: 600; color: var(--neutral-700);">
           He verificado la temperatura en el dorso de la muñeca
         </label>
@@ -981,36 +1524,69 @@
        ========================================================================= -->
   <div id="label-modal" class="modal-backdrop">
     <div class="modal-dialog" style="max-width: 460px; text-align: center;">
-      <div style="font-size: 40px; margin-bottom: 6px;">🏷️</div>
-      <div style="font-size: 12px; font-weight: 700; color: #0284C7; text-transform: uppercase; letter-spacing: 0.05em;">Entrada al Banco de Leche (FIFO)</div>
-      <h3 style="font-size: 24px; font-weight: 800; color: #0F172A; margin: 4px 0 12px;">
-        <span id="label-modal-lote-id">#LOTE FIFO 01</span>
+      <div class="label-modal-icon-badge">
+        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"/>
+          <path d="M7 7h.01"/>
+        </svg>
+      </div>
+      <div class="label-modal-kicker">Nuevo Frasco en el Banco de Leche</div>
+      <h3 class="label-modal-heading">
+        <span id="label-modal-lote-id">Frasco #01</span>
       </h3>
       
-      <div style="background: #F8FAFC; border: 2px dashed #0284C7; border-radius: 10px; padding: 14px 16px; margin-bottom: 14px; text-align: left;">
-        <div style="font-size: 11px; font-weight: 800; color: #0284C7; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.04em;">
-          📝 Datos para Rotular en el Frasco / Bolsa Física:
+      <div class="label-physical-ticket">
+        <div class="label-ticket-header">
+          Datos para escribir en el Frasco o Bolsita:
         </div>
-        <div class="label-info-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 13px; color: #1E293B;">
-          <div><strong>Identificador:</strong> <span id="label-modal-tag" style="color: #0284C7; font-weight: 800;">LOTE #01</span></div>
+        <div class="label-info-grid">
+          <div><strong>Identificador:</strong> <span id="label-modal-tag" style="color: var(--primary); font-weight: 800;">FRASCO #01</span></div>
           <div><strong>Volumen:</strong> <span id="label-modal-vol" style="font-weight: 700;">60 ml</span></div>
           <div><strong>Fecha:</strong> <span id="label-modal-date">--</span></div>
           <div><strong>Hora:</strong> <span id="label-modal-time">--</span></div>
         </div>
-        <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid #E2E8F0; font-size: 12.5px; color: #334155;">
-          <strong>Destino Térmico:</strong> <span id="label-modal-dest" style="font-weight: 700; color: #0F766E;">Refrigerador 4 °C</span>
+        <div class="label-ticket-footer">
+          <strong>Lugar de guardado:</strong> <span id="label-modal-dest" style="font-weight: 700; color: var(--secondary);">Refrigerador</span>
         </div>
       </div>
 
-      <div style="background: #EFF6FF; border-left: 4px solid #3B82F6; padding: 10px 12px; text-align: left; border-radius: 6px; margin-bottom: 18px;">
-        <p style="font-size: 12px; color: #1E40AF; margin: 0; line-height: 1.4;">
-          ✓ <strong>Insertado en Cola FIFO:</strong> El frasco ha ingresado a la cola de prioridad ordenada por fecha y hora de extracción (Primero en Entrar, Primero en Salir).
+      <div class="label-fifo-notice">
+        <p>
+          ✓ <strong>Guardado en orden:</strong> Tu leche se ha ordenado por fecha de extracción para que siempre sepas cuál consumir primero y nada se pierda.
         </p>
       </div>
 
       <button type="button" class="btn-primary" style="width: 100%;" onclick="UIController.closeLabelModal()">
-        Entendido • Ver en Inventario FIFO
+        Entendido • Ver Banco de Leche
       </button>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       MODAL DE REFERENCIA CLÍNICA / FOTOGRÁFICA (LIGHTBOX EDUCATIVO)
+       ========================================================================= -->
+  <div id="clinical-photo-modal" class="modal-backdrop" onclick="if(event.target === this) UIController.closePhotoModal()">
+    <div class="modal-dialog modal-dialog-photo" role="dialog" aria-modal="true" aria-labelledby="clinical-photo-modal-title">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span id="clinical-photo-modal-badge" class="clinical-photo-badge badge-state-normal">Signo Clínico</span>
+          <h3 id="clinical-photo-modal-title" class="modal-title" style="font-size: 15px; margin: 0;">Detalle de Referencia</h3>
+        </div>
+        <button type="button" class="btn-close-modal" onclick="UIController.closePhotoModal()" aria-label="Cerrar modal">&times;</button>
+      </div>
+
+      <div class="clinical-photo-modal-body">
+        <div id="clinical-photo-modal-graphic" class="photo-modal-graphic-hero"></div>
+        <p id="clinical-photo-modal-desc" class="photo-modal-explanation"></p>
+        <div class="photo-modal-checklist-box">
+          <div class="checklist-title">Puntos clave para la madre o cuidador:</div>
+          <ul id="clinical-photo-modal-points" class="clinical-modal-points-list"></ul>
+        </div>
+      </div>
+
+      <div class="modal-footer-actions" style="margin-top: 18px;">
+        <button type="button" class="btn-primary" style="width: 100%;" onclick="UIController.closePhotoModal()">Entendido • Volver a la evaluación</button>
+      </div>
     </div>
   </div>
 
@@ -1023,6 +1599,34 @@
        CONTENEDOR IMPRIMIBLE (REPORTE PEDIÁTRICO PARA WINDOWS PRINT)
        ========================================================================= -->
   <div id="clinical-print-report"></div>
+
+  <!-- =========================================================================
+       BARRA DE NAVEGACIÓN INFERIOR NATIVA PARA MÓVILES (BOTTOM DOCK)
+       ========================================================================= -->
+  <nav class="mobile-bottom-nav" id="mobile-bottom-nav" style="display: none;" aria-label="Navegación principal móvil">
+    <button type="button" class="mob-nav-item active" data-screen="screen-dashboard" onclick="UIController.switchScreen('screen-dashboard')">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
+      <span>Inicio</span>
+    </button>
+    <button type="button" class="mob-nav-item" data-screen="screen-inventory" onclick="UIController.switchScreen('screen-inventory')">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 7h6v2a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2V7z"/><path d="M10 7V5a2 2 0 0 1 4 0v2"/></svg>
+      <span>Frascos</span>
+    </button>
+    <button type="button" class="mob-nav-item mob-nav-fab" data-screen="screen-extraction" onclick="UIController.switchScreen('screen-extraction')">
+      <span class="mob-fab-circle">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </span>
+      <span>Extraer</span>
+    </button>
+    <button type="button" class="mob-nav-item mob-nav-alert" data-screen="screen-triage" onclick="UIController.switchScreen('screen-triage')">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <span>Triaje</span>
+    </button>
+    <button type="button" class="mob-nav-item" data-screen="screen-profile" onclick="UIController.switchScreen('screen-profile')">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>Perfil</span>
+    </button>
+  </nav>
 
   <!-- Script Principal de la Aplicación -->
   <script src="app.js"></script>

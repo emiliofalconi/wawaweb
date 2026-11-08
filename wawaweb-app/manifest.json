@@ -3,8 +3,8 @@
   "short_name": "WawaWeb",
   "start_url": "index.html",
   "display": "standalone",
-  "background_color": "#F1F5F9",
-  "theme_color": "#0D9488",
+  "background_color": "#FAF6F1",
+  "theme_color": "#C86870",
   "description": "Plataforma de gestión de banco de leche materna mediante principios FIFO y sistema de alerta neonatal temprana (COIL 202715 UCAB - PUCE)",
   "icons": [
     {
