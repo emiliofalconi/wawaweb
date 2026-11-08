@@ -444,18 +444,21 @@ img, svg, video, canvas, audio, iframe, embed, object {
 
 .bell-badge {
   position: absolute;
-  top: -3px;
-  right: -3px;
+  top: -4px;
+  right: -4px;
   background: var(--sem-red);
   color: white;
-  font-size: 9px;
+  font-size: 9.5px;
   font-weight: 700;
-  width: 15px;
-  height: 15px;
-  border-radius: 50%;
-  display: flex;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 3px;
+  border-radius: 999px;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  line-height: 1;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
 }
 
 /* ==========================================================================
@@ -693,13 +696,16 @@ img, svg, video, canvas, audio, iframe, embed, object {
 }
 
 .stat-badge {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
   font-size: 11px;
   font-weight: 600;
   padding: 3px 9px;
   border-radius: var(--radius-full);
   margin-top: 10px;
   border: 1px solid var(--neutral-200);
+  line-height: 1.25;
+  max-width: 100%;
 }
 
 .badge-refrigerado {
@@ -782,7 +788,8 @@ img, svg, video, canvas, audio, iframe, embed, object {
 }
 
 .fifo-flag {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
   background: var(--primary-subtle);
   color: var(--primary);
   border: 1px solid var(--primary-border);
@@ -790,9 +797,11 @@ img, svg, video, canvas, audio, iframe, embed, object {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  padding: 3px 10px;
+  padding: 4px 10px;
   border-radius: var(--radius-full);
   margin-bottom: 8px;
+  line-height: 1.3;
+  max-width: 100%;
 }
 
 .fifo-card-title {
@@ -1066,6 +1075,8 @@ img, svg, video, canvas, audio, iframe, embed, object {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 10px;
   padding-bottom: 6px;
   border-bottom: 1px solid var(--neutral-200);
 }
@@ -1079,15 +1090,20 @@ img, svg, video, canvas, audio, iframe, embed, object {
 }
 
 .mosaic-section-pill {
+  display: inline-flex;
+  align-items: center;
   font-size: 10.5px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.4px;
-  padding: 2px 8px;
+  padding: 3px 9px;
   border-radius: var(--radius-full);
   background: var(--primary-subtle);
   color: var(--primary);
   border: 1px solid var(--primary-border);
+  white-space: nowrap;
+  flex-shrink: 0;
+  line-height: 1.2;
 }
 
 .mosaic-section-pill.sage {
@@ -1426,7 +1442,9 @@ input[type="range"]::-moz-range-thumb {
 .batch-card-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 6px 8px;
   margin-bottom: 8px;
 }
 
@@ -1436,24 +1454,36 @@ input[type="range"]::-moz-range-thumb {
   color: var(--neutral-900);
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 6px;
+  min-width: 0;
 }
 
 .fifo-order-badge {
-  font-size: 10px;
+  display: inline-flex;
+  align-items: center;
+  font-size: 10.5px;
   font-weight: 600;
   background: var(--bg-subtle);
   color: var(--neutral-600);
   border: 1px solid var(--neutral-200);
-  padding: 1px 6px;
+  padding: 2px 7px;
   border-radius: var(--radius-sm);
+  white-space: nowrap;
+  line-height: 1.25;
 }
 
 .batch-status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   font-size: 11px;
   font-weight: 600;
-  padding: 2px 8px;
+  padding: 3px 9px;
   border-radius: var(--radius-full);
+  white-space: nowrap;
+  flex-shrink: 0;
+  line-height: 1.25;
 }
 
 .badge-green {
@@ -1555,13 +1585,17 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .calc-formula-pill {
+  display: inline-flex;
+  align-items: center;
   font-size: 11.5px;
   font-weight: 700;
   color: var(--primary);
   background: var(--bg-card);
   border: 1px solid var(--primary-border);
-  padding: 3px 9px;
+  padding: 4px 10px;
   border-radius: var(--radius-full);
+  line-height: 1.3;
+  max-width: 100%;
 }
 
 .calc-result-box {
@@ -1916,16 +1950,24 @@ input[type="range"]::-moz-range-thumb {
 .timer-card-badge {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 700;
   color: var(--primary);
   background: var(--bg-card);
   border: 1px solid var(--primary-border);
-  padding: 4px 12px;
+  padding: 5px 12px;
   border-radius: var(--radius-full);
   text-transform: uppercase;
   letter-spacing: 0.4px;
+  line-height: 1.3;
+  max-width: 100%;
+  text-align: center;
+}
+
+.timer-card-badge svg {
+  flex-shrink: 0;
 }
 
 .timer-digits {
@@ -2216,36 +2258,41 @@ input[type="range"]::-moz-range-thumb {
   max-height: 0;
   opacity: 0;
   overflow: hidden;
-  transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease, margin 0.2s ease;
+  transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease, margin 0.2s ease;
   margin-top: 0;
 }
 
 .clinical-photo-accordion.expanded {
-  max-height: 800px;
+  max-height: 1600px;
   opacity: 1;
   margin-top: 10px;
 }
 
 .clinical-comparison-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 12px;
 }
 
 .clinical-photo-card {
   background: var(--bg-card);
   border-radius: var(--radius-sm);
   border: 1.5px solid var(--neutral-200);
-  padding: 8px;
+  padding: 10px;
   cursor: pointer;
   transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .clinical-photo-card:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow-sm);
+}
+
+.clinical-photo-card:active {
+  transform: scale(0.99);
 }
 
 .clinical-photo-card.normal-state {
@@ -2267,15 +2314,16 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .clinical-photo-container {
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 16 / 10;
+  min-height: 110px;
   background: var(--bg-subtle);
-  border-radius: 6px;
+  border-radius: 8px;
   overflow: hidden;
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   border: 1px solid var(--neutral-200);
 }
 
@@ -2293,19 +2341,31 @@ input[type="range"]::-moz-range-thumb {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 6px;
   background: var(--bg-subtle);
   color: var(--primary);
-  padding: 6px;
+  padding: 12px 8px 8px;
+  text-align: center;
+}
+
+.clinical-svg-placeholder svg {
+  width: clamp(44px, 14vw, 58px);
+  height: clamp(44px, 14vw, 58px);
+  flex-shrink: 0;
 }
 
 .placeholder-overlay-hint {
-  font-size: 9.5px;
+  font-size: 10px;
   font-weight: 700;
-  color: var(--neutral-500);
+  color: var(--neutral-600);
+  background: var(--bg-card);
+  border: 1px solid var(--neutral-200);
+  padding: 2px 8px;
+  border-radius: 999px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.4px;
   margin-top: 2px;
+  white-space: nowrap;
 }
 
 .clinical-photo-caption {
@@ -2315,57 +2375,86 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .photo-state-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 2;
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 2px 7px;
+  padding: 3px 9px;
   border-radius: 999px;
-  font-size: 10px;
+  font-size: 10.5px;
   font-weight: 700;
-  margin-bottom: 4px;
   width: fit-content;
+  box-shadow: var(--shadow-xs);
+  backdrop-filter: blur(4px);
 }
 
-.photo-state-badge.state-normal {
+.photo-state-badge.state-normal,
+.photo-state-badge.badge-normal {
   background: var(--sem-green-bg);
   color: var(--sem-green-text);
   border: 1px solid var(--sem-green-border);
 }
 
-.photo-state-badge.state-alert {
+.photo-state-badge.state-alert,
+.photo-state-badge.badge-alert {
   background: var(--sem-red-bg);
   color: var(--sem-red-text);
   border: 1px solid var(--sem-red-border);
 }
 
 .photo-caption-title {
-  font-size: 11.5px;
+  font-size: 12.5px;
   font-weight: 700;
   color: var(--neutral-800);
-  margin-bottom: 2px;
-  line-height: 1.25;
+  margin-bottom: 4px;
+  line-height: 1.3;
 }
 
 .photo-caption-desc {
-  font-size: 10.5px;
+  font-size: 11.5px;
   color: var(--neutral-600);
-  line-height: 1.3;
+  line-height: 1.4;
 }
 
 /* Modal Lightbox de Fotos Clínicas */
 .modal-dialog-photo {
-  max-width: 500px;
+  max-width: 520px;
+}
+
+.modal-header-photo {
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.modal-photo-header-info {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+}
+
+.modal-photo-title {
+  font-size: 15.5px;
+  margin: 0;
+  line-height: 1.3;
+  word-break: break-word;
 }
 
 .clinical-photo-badge {
   display: inline-flex;
   align-items: center;
-  padding: 3px 8px;
+  padding: 3px 9px;
   border-radius: 999px;
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  flex-shrink: 0;
 }
 
 .clinical-photo-badge.badge-state-normal {
@@ -2384,12 +2473,18 @@ input[type="range"]::-moz-range-thumb {
   background: var(--bg-subtle);
   border: 1px solid var(--neutral-200);
   border-radius: var(--radius-sm);
-  padding: 18px;
+  padding: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 14px;
-  min-height: 130px;
+  min-height: 140px;
+}
+
+.photo-modal-graphic-hero svg {
+  width: clamp(76px, 22vw, 104px);
+  height: clamp(76px, 22vw, 104px);
+  max-width: 100%;
 }
 
 .photo-modal-explanation {
@@ -2577,14 +2672,17 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .tag-method {
-  display: inline-block;
-  padding: 2px 7px;
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
   background: var(--primary-subtle);
   color: var(--primary);
   border: 1px solid var(--primary-border);
-  border-radius: 4px;
+  border-radius: 999px;
   font-size: 11px;
-  font-weight: 500;
+  font-weight: 600;
+  line-height: 1.25;
+  white-space: nowrap;
 }
 
 /* ==========================================================================
@@ -2652,18 +2750,23 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .auth-logo-badge {
-  display: block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: fit-content;
+  max-width: 100%;
   margin: 0 auto 10px;
   background: var(--secondary-subtle);
   color: var(--secondary);
   border: 1px solid var(--secondary-border);
   font-weight: 700;
   font-size: 11px;
-  padding: 4px 14px;
+  padding: 5px 14px;
   border-radius: var(--radius-full);
-  letter-spacing: 0.8px;
+  letter-spacing: 0.6px;
   text-transform: uppercase;
+  line-height: 1.3;
+  text-align: center;
 }
 
 .auth-title {
@@ -2907,13 +3010,17 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .calc-days-pill {
+  display: inline-flex;
+  align-items: center;
   font-size: 11.5px;
   font-weight: 600;
   color: var(--secondary);
   background: var(--secondary-subtle);
   border: 1px solid var(--secondary-border);
-  padding: 2px 8px;
+  padding: 3px 8px;
   border-radius: 6px;
+  line-height: 1.25;
+  white-space: nowrap;
 }
 
 .calc-days-pill.is-error {
@@ -3254,8 +3361,10 @@ input[type="range"]::-moz-range-thumb {
   gap: 5px;
   font-size: 11px;
   font-weight: 600;
-  padding: 3px 8px;
+  padding: 4px 10px;
   border-radius: var(--radius-full);
+  line-height: 1.25;
+  max-width: 100%;
 }
 .db-status-badge.online {
   background: var(--sem-green-bg);
@@ -3671,9 +3780,11 @@ input[type="range"]::-moz-range-thumb {
   }
 
   .stat-badge {
-    font-size: 10px;
-    padding: 2px 7px;
+    font-size: 10.5px;
+    padding: 3px 8px;
     margin-top: 6px;
+    line-height: 1.25;
+    max-width: 100%;
   }
 
   /* 6. FORMULARIOS E INPUTS TÁCTILES (SIN AUTO-ZOOM EN IOS) */
@@ -3842,7 +3953,42 @@ input[type="range"]::-moz-range-thumb {
 
   .batch-card-header {
     flex-wrap: wrap;
+    gap: 6px 8px;
+    align-items: center;
+  }
+
+  .batch-id-tag {
+    font-size: 13.5px;
     gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .fifo-order-badge {
+    font-size: 10.5px;
+    padding: 2px 7px;
+  }
+
+  .batch-status-badge {
+    font-size: 11px;
+    padding: 3px 9px;
+  }
+
+  .calc-formula-pill {
+    font-size: 11px;
+    padding: 4px 9px;
+    width: fit-content;
+  }
+
+  .timer-card-badge {
+    font-size: 11px;
+    padding: 5px 10px;
+    line-height: 1.3;
+  }
+
+  .auth-logo-badge {
+    font-size: 10.5px;
+    padding: 4px 12px;
+    letter-spacing: 0.4px;
   }
 
   .batch-card-body {
@@ -3951,16 +4097,48 @@ input[type="range"]::-moz-range-thumb {
   }
 
   .clinical-comparison-grid {
-    gap: 8px;
+    grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+    gap: 10px;
   }
 
   .clinical-photo-card {
-    padding: 7px;
+    padding: 10px;
+  }
+
+  .clinical-photo-container {
+    aspect-ratio: 16 / 10;
+    min-height: 105px;
+    margin-bottom: 8px;
+  }
+
+  .photo-caption-title {
+    font-size: 13px;
+  }
+
+  .photo-caption-desc {
+    font-size: 12px;
+    line-height: 1.4;
   }
 
   .btn-toggle-clinical-ref {
     min-height: 44px;
     padding: 10px 12px;
+    font-size: 12.5px;
+  }
+
+  .photo-modal-graphic-hero {
+    padding: 16px;
+    min-height: 120px;
+  }
+
+  .photo-modal-explanation {
+    font-size: 13.5px;
+    line-height: 1.5;
+  }
+
+  .clinical-modal-points-list {
+    font-size: 12.5px;
+    line-height: 1.5;
   }
 
   .cal-nav-btn {

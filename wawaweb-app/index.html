@@ -907,7 +907,7 @@
                           </svg>
                           <span class="placeholder-overlay-hint">Toca para ampliar</span>
                         </div>
-                        <span class="photo-state-badge badge-normal">Técnica Correcta</span>
+                        <span class="photo-state-badge state-normal">Técnica Correcta</span>
                       </div>
                       <div class="photo-caption-title">Olla fuera del fuego (Agua tibia ~40 °C)</div>
                       <div class="photo-caption-desc">Recipiente sumergido pasivamente sin hervor para no alterar las proteínas ni enzimas.</div>
@@ -927,7 +927,7 @@
                           </svg>
                           <span class="placeholder-overlay-hint">Toca para ampliar</span>
                         </div>
-                        <span class="photo-state-badge badge-alert">Prohibido</span>
+                        <span class="photo-state-badge state-alert">Prohibido</span>
                       </div>
                       <div class="photo-caption-title">Calor irregular y quemaduras</div>
                       <div class="photo-caption-desc">Genera puntos calientes invisibles que queman la boca del bebé y destruyen los anticuerpos.</div>
@@ -1035,7 +1035,7 @@
                         </svg>
                         <span class="placeholder-overlay-hint">Toca para ampliar</span>
                       </div>
-                      <span class="photo-state-badge badge-normal">Normal</span>
+                      <span class="photo-state-badge state-normal">Normal</span>
                     </div>
                     <div class="photo-caption-title">Plana y firme al tacto</div>
                     <div class="photo-caption-desc">Al nivel del cráneo. Puede sentirse un suave latido arterial que es fisiológico.</div>
@@ -1052,7 +1052,7 @@
                         </svg>
                         <span class="placeholder-overlay-hint">Toca para ampliar</span>
                       </div>
-                      <span class="photo-state-badge badge-alert">Alarma AIEPI</span>
+                      <span class="photo-state-badge state-alert">Alarma AIEPI</span>
                     </div>
                     <div class="photo-caption-title">Hundida / Deprimida</div>
                     <div class="photo-caption-desc">Forma una hendidura o pozo perceptible. Indica descenso del volumen de fluidos corporales.</div>
@@ -1120,7 +1120,7 @@
                         </svg>
                         <span class="placeholder-overlay-hint">Toca para ampliar</span>
                       </div>
-                      <span class="photo-state-badge badge-normal">Normal</span>
+                      <span class="photo-state-badge state-normal">Normal</span>
                     </div>
                     <div class="photo-caption-title">Brillantes y con saliva líquida</div>
                     <div class="photo-caption-desc">Lengua y encías rosadas con película húmeda brillante y saliva transparente.</div>
@@ -1138,7 +1138,7 @@
                         </svg>
                         <span class="placeholder-overlay-hint">Toca para ampliar</span>
                       </div>
-                      <span class="photo-state-badge badge-alert">Alarma AIEPI</span>
+                      <span class="photo-state-badge state-alert">Alarma AIEPI</span>
                     </div>
                     <div class="photo-caption-title">Secos, agrietados o pegajosos</div>
                     <div class="photo-caption-desc">Saliva filamentosa o ausencia total de humedad en la lengua y comisuras labiales.</div>
@@ -1206,7 +1206,7 @@
                         </svg>
                         <span class="placeholder-overlay-hint">Toca para ampliar</span>
                       </div>
-                      <span class="photo-state-badge badge-normal">Normal</span>
+                      <span class="photo-state-badge state-normal">Normal</span>
                     </div>
                     <div class="photo-caption-title">Retorno inmediato (&lt; 1 seg)</div>
                     <div class="photo-caption-desc">Al soltar el pellizco en abdomen, la piel se alisa instantáneamente sin dejar marca.</div>
@@ -1223,7 +1223,7 @@
                         </svg>
                         <span class="placeholder-overlay-hint">Toca para ampliar</span>
                       </div>
-                      <span class="photo-state-badge badge-alert">Alarma AIEPI</span>
+                      <span class="photo-state-badge state-alert">Alarma AIEPI</span>
                     </div>
                     <div class="photo-caption-title">Pliegue persistente (&gt; 2 seg)</div>
                     <div class="photo-caption-desc">La piel queda levantada formando una tienda de campaña. Alarma crítica de deshidratación.</div>
@@ -1292,7 +1292,7 @@
                         </svg>
                         <span class="placeholder-overlay-hint">Toca para ampliar</span>
                       </div>
-                      <span class="photo-state-badge badge-normal">Normal</span>
+                      <span class="photo-state-badge state-normal">Normal</span>
                     </div>
                     <div class="photo-caption-title">Brillantes con lágrimas fluidas</div>
                     <div class="photo-caption-desc">Ojos vivos y expresivos que producen lágrimas claras cuando el bebé llora o bosteza.</div>
@@ -1310,7 +1310,7 @@
                         </svg>
                         <span class="placeholder-overlay-hint">Toca para ampliar</span>
                       </div>
-                      <span class="photo-state-badge badge-alert">Alarma AIEPI</span>
+                      <span class="photo-state-badge state-alert">Alarma AIEPI</span>
                     </div>
                     <div class="photo-caption-title">Cuencas hundidas sin lágrimas</div>
                     <div class="photo-caption-desc">Ojeras oscuras marcadas, ojos retraídos hacia adentro y llanto seco sin producir lágrimas.</div>
@@ -1567,10 +1567,10 @@
        ========================================================================= -->
   <div id="clinical-photo-modal" class="modal-backdrop" onclick="if(event.target === this) UIController.closePhotoModal()">
     <div class="modal-dialog modal-dialog-photo" role="dialog" aria-modal="true" aria-labelledby="clinical-photo-modal-title">
-      <div class="modal-header">
-        <div style="display: flex; align-items: center; gap: 8px;">
+      <div class="modal-header modal-header-photo">
+        <div class="modal-photo-header-info">
           <span id="clinical-photo-modal-badge" class="clinical-photo-badge badge-state-normal">Signo Clínico</span>
-          <h3 id="clinical-photo-modal-title" class="modal-title" style="font-size: 15px; margin: 0;">Detalle de Referencia</h3>
+          <h3 id="clinical-photo-modal-title" class="modal-title modal-photo-title">Detalle de Referencia</h3>
         </div>
         <button type="button" class="btn-close-modal" onclick="UIController.closePhotoModal()" aria-label="Cerrar modal">&times;</button>
       </div>

@@ -2365,8 +2365,8 @@ const UIController = {
     let itemsHtml = lotes.map(l => {
       const st = FIFOEngine.getBatchStatus(l);
       return `
-        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: var(--bg-card); border: 1px solid var(--neutral-200); border-radius: var(--radius-sm); margin-bottom: 6px;">
-          <div>
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px 10px; padding: 10px 14px; background: var(--bg-card); border: 1px solid var(--neutral-200); border-radius: var(--radius-sm); margin-bottom: 6px;">
+          <div style="min-width: 0;">
             <strong>LOTE #${String(l.id_lote).padStart(2, '0')}</strong> (${l.volumen_ml} ml)
             <div style="font-size: 11px; color: var(--neutral-500);">${l.ubicacion_termica === 'Ambiente' ? 'Ambiente (≤25 °C)' : (l.ubicacion_termica === 'Refrigerador_4C' ? 'Refrigerador (4 °C)' : 'Congelador (-18 °C)')}</div>
           </div>
