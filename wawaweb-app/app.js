@@ -1873,6 +1873,7 @@ const UIController = {
       'fontanela-normal': {
         state: 'Signo Normal',
         badgeClass: 'badge-state-normal',
+        imgSrc: 'assets/images/fontanela_normal.jpg',
         title: 'Fontanela Normotensa (Plana al tacto)',
         desc: 'Al palpar suavemente la parte superior de la cabeza con el bebé erguido y tranquilo, la fontanela anterior se siente plana, nivelada con la superficie del cráneo y ligeramente pulsátil al ritmo cardíaco.',
         clinicalPoints: [
@@ -1891,6 +1892,7 @@ const UIController = {
       'fontanela-alert': {
         state: 'Signo de Alarma',
         badgeClass: 'badge-state-alert',
+        imgSrc: 'assets/images/fontanela_hundida.jpg',
         title: 'Fontanela Deprimida o Hundida',
         desc: 'La fontanela anterior se aprecia visiblemente hundida o se palpa como un desnivel marcado por debajo de los bordes óseos del cráneo. Es un signo clásico de deshidratación moderada a severa.',
         clinicalPoints: [
@@ -1910,6 +1912,7 @@ const UIController = {
       'mucosas-normal': {
         state: 'Signo Normal',
         badgeClass: 'badge-state-normal',
+        imgSrc: 'assets/images/mucosas_normales.jpg',
         title: 'Mucosas Orales y Labios Húmedos',
         desc: 'Los labios se muestran rosados y brillantes; la lengua y las encías presentan una capa continua de saliva líquida y fluida sin adherencias blanquecinas ni sequedad.',
         clinicalPoints: [
@@ -1927,6 +1930,7 @@ const UIController = {
       'mucosas-alert': {
         state: 'Signo de Alarma',
         badgeClass: 'badge-state-alert',
+        imgSrc: 'assets/images/mucosas_secas.jpg',
         title: 'Mucosas Orales Secas y Saliva Espesa',
         desc: 'Lengua y encías blanquecinas, secas o pegajosas al tacto. Labios cuarteados o con pieles secas por falta de líquido circulante.',
         clinicalPoints: [
@@ -1944,6 +1948,7 @@ const UIController = {
       'pliegue-normal': {
         state: 'Signo Normal',
         badgeClass: 'badge-state-normal',
+        imgSrc: 'assets/images/pliegue_normal.jpg',
         title: 'Signo del Pliegue Cutáneo Negativo',
         desc: 'Al pellizcar con suavidad un pliegue de piel en el abdomen entre el pulgar y el índice durante 1 segundo y soltarlo, la piel recupera de inmediato su forma lisa (< 1 segundo).',
         clinicalPoints: [
@@ -1960,6 +1965,7 @@ const UIController = {
       'pliegue-alert': {
         state: 'Signo de Alarma',
         badgeClass: 'badge-state-alert',
+        imgSrc: 'assets/images/pliegue_persistente.jpg',
         title: 'Signo del Pliegue Cutáneo Positivo (> 2s)',
         desc: 'La piel pellizcada en el abdomen tarda 2 segundos o más en volver a su posición plana (se mantiene levantada como tienda de campaña). Es un signo cardenal de deshidratación con pérdida marcada de turgencia celular.',
         clinicalPoints: [
@@ -1975,6 +1981,7 @@ const UIController = {
       'ojos-normal': {
         state: 'Signo Normal',
         badgeClass: 'badge-state-normal',
+        imgSrc: 'assets/images/ojos_normales.jpg',
         title: 'Ojos Brillantes y Lágrimas Presentes',
         desc: 'Los ojos se observan húmedos, vivaces y en posición anatómica normal respecto a las órbitas. Al llorar, el lactante produce lágrimas copiosas y visibles.',
         clinicalPoints: [
@@ -1992,6 +1999,7 @@ const UIController = {
       'ojos-alert': {
         state: 'Signo de Alarma',
         badgeClass: 'badge-state-alert',
+        imgSrc: 'assets/images/ojos_hundidos.jpg',
         title: 'Ojos Hundidos y Llanto sin Lágrimas',
         desc: 'Los ojos se ven profundos o apagados en sus cuencas orbitarias. Durante el llanto intenso no se observa caída de lágrimas en las mejillas ni humedad conjuntival.',
         clinicalPoints: [
@@ -2027,7 +2035,13 @@ const UIController = {
       badgeEl.className = `clinical-photo-badge ${data.badgeClass}`;
       badgeEl.innerText = data.state;
     }
-    if (graphicEl) graphicEl.innerHTML = data.svgPlaceholder;
+    if (graphicEl) {
+      if (data.imgSrc) {
+        graphicEl.innerHTML = `<img src="${data.imgSrc}" alt="${data.title}" style="max-height: 220px; width: auto; max-width: 100%; border-radius: var(--radius-sm); object-fit: contain; box-shadow: var(--shadow-sm);" onerror="this.outerHTML='${data.svgPlaceholder.replace(/'/g, "\\'")}'">`;
+      } else {
+        graphicEl.innerHTML = data.svgPlaceholder;
+      }
+    }
     if (descEl) descEl.innerText = data.desc;
     if (listEl) {
       listEl.innerHTML = data.clinicalPoints.map(p => `<li>${p}</li>`).join('');
@@ -2201,6 +2215,38 @@ const UIController = {
     StorageManager.set(StorageManager.KEYS.EVALUACIONES, evaluaciones);
     SoundEffects.playChime('success');
     this.showToast("Revisión de bienestar guardada con éxito.");
+  },
+
+  handleSurveySubmit(event) {
+    if (event) event.preventDefault();
+    const q1Radio = document.querySelector('input[name="survey_q1"]:checked');
+    const q1 = q1Radio ? q1Radio.value : '';
+    const q2 = document.getElementById('survey-q2')?.value.trim() || '';
+    const q3 = document.getElementById('survey-q3')?.value.trim() || '';
+
+    if (!q1) {
+      this.showToast('Por favor responde la pregunta 1.');
+      return;
+    }
+
+    const surveyData = {
+      fecha: new Date().toISOString(),
+      completado_sin_ayuda: q1,
+      lo_que_mas_gusto: q2,
+      dudas_o_inconvenientes: q3
+    };
+
+    const surveys = StorageManager.get('wawaweb_encuestas_satisfaccion') || [];
+    surveys.push(surveyData);
+    StorageManager.set('wawaweb_encuestas_satisfaccion', surveys);
+
+    const msgEl = document.getElementById('survey-success-msg');
+    const formEl = document.getElementById('form-satisfaction-survey');
+    if (formEl) formEl.style.display = 'none';
+    if (msgEl) msgEl.style.display = 'block';
+
+    SoundEffects.playChime('success');
+    this.showToast('¡Encuesta enviada con éxito! Muchas gracias.');
   },
 
   async saveProfileToBackend() {

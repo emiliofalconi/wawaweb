@@ -1344,6 +1344,57 @@
             Guardar Evaluación en Historial Clínico
           </button>
         </div>
+
+        <!-- Encuesta de satisfacción -->
+        <div class="triage-card" id="satisfaction-survey-card" style="margin-top: 24px; border-left: 4px solid var(--primary);">
+          <div class="triage-card-header">
+            <span class="triage-card-badge" style="background: var(--primary); color: white;">★</span>
+            <span class="triage-card-title">Encuesta de satisfacción</span>
+          </div>
+          <p style="font-size: 13px; color: var(--neutral-600); margin: 6px 0 16px 0; line-height: 1.5;">
+            Tu opinión nos permite validar la facilidad de uso y la claridad de la evaluación clínica en WawaWeb.
+          </p>
+
+          <form id="form-satisfaction-survey" onsubmit="UIController.handleSurveySubmit(event)">
+            <div class="form-group" style="margin-bottom: 14px;">
+              <label class="form-label" style="font-weight: 600; font-size: 13.5px; color: var(--neutral-800); line-height: 1.4;">
+                1. ¿Pudo completar y guardar este registro en el primer intento sin necesitar ayuda?
+              </label>
+              <div style="display: flex; gap: 24px; margin-top: 8px;">
+                <label style="display: inline-flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; color: var(--neutral-800); font-weight: 500;">
+                  <input type="radio" name="survey_q1" value="Si" required style="accent-color: var(--primary); width: 18px; height: 18px;">
+                  <span>( ) Sí</span>
+                </label>
+                <label style="display: inline-flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; color: var(--neutral-800); font-weight: 500;">
+                  <input type="radio" name="survey_q1" value="No" required style="accent-color: var(--primary); width: 18px; height: 18px;">
+                  <span>( ) No</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 14px;">
+              <label class="form-label" for="survey-q2" style="font-weight: 600; font-size: 13.5px; color: var(--neutral-800); line-height: 1.4;">
+                2. ¿Qué fue lo que más te gustó o te pareció más práctico a la hora del registro?
+              </label>
+              <textarea id="survey-q2" class="form-input" rows="2" placeholder="Escribe tu respuesta aquí..." style="resize: vertical; width: 100%; font-family: inherit; font-size: 13px;"></textarea>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 16px;">
+              <label class="form-label" for="survey-q3" style="font-weight: 600; font-size: 13.5px; color: var(--neutral-800); line-height: 1.4;">
+                3. ¿Tuviste alguna duda o inconveniente al usar la web?
+              </label>
+              <textarea id="survey-q3" class="form-input" rows="2" placeholder="Cuéntanos cualquier duda o detalle que podamos mejorar..." style="resize: vertical; width: 100%; font-family: inherit; font-size: 13px;"></textarea>
+            </div>
+
+            <button type="submit" class="btn-primary" style="background: var(--neutral-800); width: 100%; justify-content: center;">
+              Enviar Encuesta de Satisfacción
+            </button>
+          </form>
+
+          <div id="survey-success-msg" style="display: none; margin-top: 12px; padding: 14px; background: var(--sem-green-bg); color: var(--sem-green); border: 1px solid var(--sem-green); border-radius: var(--radius-sm); font-size: 13.5px; font-weight: 600; text-align: center;">
+            ✓ ¡Muchas gracias! Tu respuesta a la encuesta de satisfacción ha sido guardada.
+          </div>
+        </div>
       </section>
 
       <!-- ---------------------------------------------------------------------
