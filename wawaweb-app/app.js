@@ -2168,15 +2168,11 @@ const UIController = {
       <div class="diag-desc">${res.description}</div>
       <div style="font-weight: 700; margin-bottom: 12px; font-size: 13.5px;">Acción Clínica Indicada: ${res.actionRequired}</div>
       ${res.showCallButton ? `
-        <a href="tel:911" class="btn-emergency-call" onclick="SoundEffects.playChime('alarm')">
+        <a href="tel:911" class="btn-emergency-call">
           Llamar Directamente a Emergencias Pediátricas (911)
         </a>
       ` : ''}
     `;
-
-    if (res.level === 'danger') {
-      SoundEffects.playChime('alarm');
-    }
   },
 
   async saveTriageEvaluation() {
